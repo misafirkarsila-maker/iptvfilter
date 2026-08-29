@@ -15,9 +15,7 @@
 ---
 
 > [!TIP]
-> **🌐 Free Cloud Service (No Installation Required)**  
-> Don't want to manage Docker or a VPS? Use our ready-to-use free cloud instance:  
-> 🔗 [**iptvfilter.online**](https://iptvfilter.online) &nbsp;|&nbsp; ⚡ [**newlist.best**](https://newlist.best)
+> **🚀 Try It Free Online:** Test the live platform now at [**iptvfilter.online**](https://iptvfilter.online)
 
 ## 🇬🇧 English
 
@@ -122,9 +120,7 @@ If your VPS has a NAT IPv4 (shared IP with restricted ports) and you own a domai
 <br>
 
 > [!TIP]
-> **🌐 Ücretsiz Hazır Bulut Servisi (Kurulum Gerektirmez)**  
-> Docker veya VPS sunucusu kurmak istemiyorsanız, doğrudan ücretsiz bulut altyapımızı kullanabilirsiniz:  
-> 🔗 [**iptvfilter.online**](https://iptvfilter.online) &nbsp;|&nbsp; ⚡ [**newlist.best**](https://newlist.best)
+> **🚀 Ücretsiz Denemek İçin:** Canlı sürümü doğrudan deneyebilirsiniz: [**iptvfilter.online**](https://iptvfilter.online)
 
 ## 🇹🇷 Türkçe
 
