@@ -892,15 +892,15 @@
   <div class="modal-overlay" id="securityModal" onclick="closeModalOnOverlay(event)">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">🔐 Panel Güvenlik Ayarları</h3>
+        <h3 class="modal-title" data-i18n="security_modal_title">🔐 Panel Güvenlik Ayarları</h3>
         <button class="modal-close" onclick="closeSecurityModal()">✕</button>
       </div>
 
       <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;">
         {% if has_panel_password %}
-        Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.
+        <span data-i18n="security_modal_desc_protected">Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.</span>
         {% else %}
-        Paneliniz şu anda <strong>şifresiz</strong>. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.
+        <span data-i18n="security_modal_desc_unprotected">Paneliniz şu anda <strong>şifresiz</strong>. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.</span>
         {% endif %}
       </p>
 
@@ -908,15 +908,17 @@
       <form action="/settings/panel-password" method="post">
         <input type="hidden" name="action_type" value="set">
         <div style="margin-bottom:12px;">
-          <label for="new_pass">{% if has_panel_password %}Yeni Panel Şifresi{% else %}Panel Şifresi{% endif %}</label>
+          <label for="new_pass" data-i18n="new_pass_label">{% if has_panel_password %}Yeni Panel Şifresi{% else %}Panel Şifresi{% endif %}</label>
           <input type="password" id="new_pass" name="new_password" required minlength="3" placeholder="En az 3 karakter">
         </div>
         <div style="margin-bottom:18px;">
-          <label for="new_pass_confirm">Şifre Tekrarı</label>
+          <label for="new_pass_confirm" data-i18n="confirm_pass_label">Şifre Tekrarı</label>
           <input type="password" id="new_pass_confirm" name="new_password_confirm" required minlength="3" placeholder="Şifrenizi tekrar yazın">
         </div>
         <button class="btn" type="submit" style="width:100%; justify-content:center;">
-          {% if has_panel_password %}Şifreyi Güncelle{% else %}Şifreyi Kaydet ve Koru{% endif %}
+          <span data-i18n="{% if has_panel_password %}update_pass_btn{% else %}protect_pass_btn{% endif %}">
+            {% if has_panel_password %}Şifreyi Güncelle{% else %}Şifreyi Kaydet ve Koru{% endif %}
+          </span>
         </button>
       </form>
 
@@ -925,7 +927,7 @@
       <form action="/settings/panel-password" method="post" onsubmit="return confirm('Panel korumasını kaldırıp şifresiz moda geçmek istediğinize emin misiniz?');">
         <input type="hidden" name="action_type" value="remove">
         <button class="btn ghost sm" type="submit" style="width:100%; justify-content:center; color:var(--err); border-color:rgba(239,68,68,0.3);">
-          🔓 Şifreyi Kaldır (Şifresiz Kullan)
+          <span data-i18n="remove_pass_btn">🔓 Şifreyi Kaldır (Şifresiz Kullan)</span>
         </button>
       </form>
       {% endif %}
@@ -1312,7 +1314,15 @@
         "server_url_label_input": "Sunucu URL",
         "username_label_input": "Kullanıcı Adı",
         "password_label_input": "Şifre",
-        "save_provider_btn": "Sağlayıcıyı Kaydet"
+        "save_provider_btn": "Sağlayıcıyı Kaydet",
+        "security_modal_title": "🔐 Panel Güvenlik Ayarları",
+        "security_modal_desc_protected": "Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.",
+        "security_modal_desc_unprotected": "Paneliniz şu anda şifresiz. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.",
+        "new_pass_label": "Yeni Panel Şifresi",
+        "confirm_pass_label": "Şifre Tekrarı",
+        "update_pass_btn": "Şifreyi Güncelle",
+        "protect_pass_btn": "Şifreyi Kaydet ve Koru",
+        "remove_pass_btn": "🔓 Şifreyi Kaldır (Şifresiz Kullan)"
       },
       en: {
         "brand_title": "Xtream Filter",
@@ -1365,7 +1375,15 @@
         "server_url_label_input": "Server URL",
         "username_label_input": "Username",
         "password_label_input": "Password",
-        "save_provider_btn": "Save Provider"
+        "save_provider_btn": "Save Provider",
+        "security_modal_title": "🔐 Panel Security Settings",
+        "security_modal_desc_protected": "Your panel is currently password protected. You can change your password or switch to open mode.",
+        "security_modal_desc_unprotected": "Your panel is currently open. You can set a password to prevent unauthorized access.",
+        "new_pass_label": "New Panel Password",
+        "confirm_pass_label": "Confirm Password",
+        "update_pass_btn": "Update Password",
+        "protect_pass_btn": "Save and Protect",
+        "remove_pass_btn": "🔓 Remove Password (Open Access)"
       }
     };
 

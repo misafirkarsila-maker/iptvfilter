@@ -28,12 +28,15 @@ A production-ready, ultra-lightweight IPTV management platform and multi-provide
 ### ✨ Key Features
 
 - 🌐 **Multi-Provider Aggregation** — Connect multiple Xtream providers and raw M3U URLs simultaneously. Consolidates Live TV, VOD, and Series into a single unified Xtream API and M3U output.
+- 📁 **Smart Country & Language Category Grouping** — Automatically detects country and language prefixes (`TR:`, `DE:`, `FR:`, etc.) and groups categories into neat accordions with instant search and bulk toggle.
+- 🔢 **8-Digit Numeric TV PIN** — API passwords are easy-to-type 8-digit numeric PINs designed specifically for smart TV remote controls with custom PIN dialog.
 - 📶 **Priority & Failover Ordering** — Reorder providers (▲ / ▼) with a single click. Channels from higher-priority providers take precedence.
-- 🧹 **Intelligent Channel Deduplication** — Automatically detects identical channels across multiple providers (stripping prefixes like `TR:`, `[TR]`, `FHD`, `4K`, `HEVC`, and normalizing diacritics) to avoid duplicate clutter while preventing false positives (e.g., `BEIN SPORTS 1` vs `BEIN SPORTS 2` are kept distinct).
-- ⚡ **Memory-Safe Streaming M3U Parser** — Ingests 50MB+ M3U playlists in memory-efficient HTTP chunks with zero RAM bloat, automatically attempting an Xtream API handshake first.
+- 🧹 **Intelligent Channel Deduplication** — Automatically detects identical channels across multiple providers (stripping prefixes like `TR:`, `[TR]`, `FHD`, `4K`, `HEVC`, and normalizing diacritics) to avoid duplicate clutter while preventing false positives.
+- ⚡ **Memory-Safe Streaming M3U Parser** — Ingests 50MB+ M3U playlists in memory-efficient HTTP chunks with zero RAM bloat.
 - 📺 **Category & Live TV Channel-Level Filtering** — Enable/disable entire categories or open the channel drawer to search, inspect logos, and toggle individual Live TV channels.
-- 🚫 **Zero Video Proxy (HTTP 302 Direct Streaming)** — Video data **never** passes through your server. Stream requests return a lightweight `HTTP 302 Found` redirect straight to the upstream CDN. Ideal for budget VPS with minimal bandwidth or CPU.
+- 🛡️ **Dual Streaming Modes (Zero-Proxy 302 vs Reverse Proxy)** — Choose between lightweight `HTTP 302 Found` direct redirection (zero server bandwidth consumption) or built-in Reverse Video Stream Proxy for restrictive IPTV players.
 - 🕒 **Aggregated EPG (XMLTV & Short EPG)** — Generates filtered XMLTV (`/xmltv.php`) and Xtream JSON short EPG (`/player_api.php?action=get_short_epg`) for active channels only.
+- 🏗️ **Multi-Arch Docker Ready** — Native `linux/amd64` and `linux/arm64` container images built automatically for VPS, Raspberry Pi, and Apple Silicon.
 - 🔒 **Flexible Authentication** — Open access for private home networks or cookie-based password protection for public VPS setups. Fernet AES-128 database credential encryption.
 - 🌍 **Bilingual Web Dashboard** — Instant language switching between **Turkish (🇹🇷)** and **English (🇬🇧)** with mobile-first responsive design.
 
@@ -48,11 +51,11 @@ A production-ready, ultra-lightweight IPTV management platform and multi-provide
 git clone https://github.com/misafirkarsila-maker/iptvfilter.git
 cd iptvfilter
 
-# 2. Run container
+# 2. Run container (default port: 4788)
 docker compose up -d
 
 # 3. Access web dashboard
-http://localhost:8000
+http://localhost:4788
 ```
 
 #### Option B: Bare Metal / Native Python (for low-RAM VPS: 128MB - 512MB)
@@ -127,12 +130,15 @@ If your VPS has a NAT IPv4 (shared IP with restricted ports) and you own a domai
 ### ✨ Temel Özellikler
 
 - 🌐 **Multi-Provider Aggregation** — Birden fazla Xtream sağlayıcısını ve saf M3U linkini aynı anda aktif edin; Canlı TV, Film (VOD) ve Dizi içeriklerini tek bir Xtream API ve M3U çıktısında birleştirin.
+- 📁 **Akıllı Ülke & Dil Gruplaması (Accordion)** — Kategori isimlerindeki ülke ve dil takılarını (`TR:`, `DE:`, `FR:`, vb.) otomatik tespit eder; kategorileri akordeon gruplara ayırır, anlık arama ve grup bazlı toplu aç/kapat imkanı sunar.
+- 🔢 **8 Haneli Sayısal TV PIN** — API şifreleri, akıllı televizyon kumandalarıyla rahatça girilebilmesi için tamamen rakamlardan oluşan 8 haneli PIN formatına yükseltildi. İsterseniz özel PIN belirleyebilirsiniz.
 - 📶 **Sağlayıcı Önceliği (Priority Sıralaması)** — Panelden sağlayıcıların öncelik sırasını (▲ / ▼) tek tıkla değiştirin. Üst sıradaki sağlayıcının kanalları önceliklidir.
-- 🧹 **Akıllı Duplicate Kanal Yönetimi** — Aynı kanal birden fazla sağlayıcıda varsa otomatik tespit edilip elenir. `TR:`, `[TR]`, `FHD`, `4K`, `HEVC` gibi takılar ve Türkçe karakter farkları temizlenir; yanlış pozitiflere (örn: `BEIN SPORTS 1` ile `BEIN SPORTS 2`) yol açmaz.
-- ⚡ **Bellek Dostu Akışkan M3U Parser** — 50MB+ devasa M3U dosyalarını RAM tüketmeden HTTP streaming ile satır satır işler. Yapıştırılan linklerde önce Xtream API bağlantısını dener.
+- 🧹 **Akıllı Duplicate Kanal Yönetimi** — Aynı kanal birden fazla sağlayıcıda varsa otomatik tespit edilip elenir. `TR:`, `[TR]`, `FHD`, `4K`, `HEVC` gibi takılar ve Türkçe karakter farkları temizlenir.
+- ⚡ **Bellek Dostu Akışkan M3U Parser** — 50MB+ devasa M3U dosyalarını RAM tüketmeden HTTP streaming ile satır satır işler.
 - 📺 **Kategori & Live TV Kanal Düzeyinde Filtreleme** — İstemediğiniz kategorileri kapatın veya Canlı TV kategorilerinin içine girerek logoları ve anlık arama motoruyla tek tek kanalları açıp kapatın.
-- 🚫 **Sıfır Video Trafiği (HTTP 302 Doğrudan Yönlendirme)** — Sunucunuz asla video proxy veya transcoding yapmaz. Oynatıcı istekleri `HTTP 302` yönlendirmesiyle doğrudan sağlayıcının CDN'ine aktarılır.
+- 🛡️ **Çift Yayın Akış Modu (302 Direct vs Reverse Stream Proxy)** — İster sunucu trafiği harcamayan hafif `HTTP 302` doğrudan yönlendirmeyi, ister kısıtlayıcı oynatıcılar için sunucu üzerinden aktaran Reverse Video Proxy modunu tek tıkla kullanın.
 - 🕒 **Birleşik EPG (XMLTV & Short EPG)** — Yalnızca seçtiğiniz aktif kanalların EPG bilgileri `/xmltv.php` ve `/player_api.php?action=get_short_epg` çıktısına dahil edilir.
+- 🏗️ **Multi-Arch Docker Desteği** — Raspberry Pi ve Apple Silicon dahil tüm ortamlar için otomatik `linux/amd64` ve `linux/arm64` imajları.
 - 🔒 **Esnek Güvenlik** — Yerel ağda şifresiz kullanım veya internete açık sunucularda şifre korumalı panel. Sağlayıcı şifreleri Fernet AES-128 ile veritabanında şifreli saklanır.
 - 🌍 **Çift Dil Desteği (i18n)** — Tek tıkla **Türkçe (🇹🇷)** ve **İngilizce (🇬🇧)** arasında geçiş yapılabilen mobil uyumlu şık web paneli.
 
@@ -148,7 +154,7 @@ cd iptvfilter
 docker compose up -d
 ```
 
-Tarayıcınızdan `http://<sunucu-ip>:8000` adresine gidin.
+Tarayıcınızdan `http://<sunucu-ip>:4788` adresine gidin.
 
 #### Yöntem B: Düşük RAM'li VPS'lerde Saf Python ile (128MB - 512MB)
 
