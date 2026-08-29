@@ -30,7 +30,7 @@ ENV_EXAMPLE_FILE = BASE_DIR / ".env.example"
 _CACHE: Dict[str, Any] = {}
 
 
-def generate_secure_password(length: int = 6) -> str:
+def generate_secure_password(length: int = 8) -> str:
     """TV kumandasıyla kolayca girilebilmesi için sadece rakamlardan oluşan sayısal PIN şifre üretir."""
     first_digit = secrets.choice("123456789")
     remaining_digits = "".join(secrets.choice("0123456789") for _ in range(length - 1))
@@ -149,7 +149,7 @@ def init_security_settings() -> Dict[str, Any]:
         api_password = settings["api_password"]
     else:
         # Otomatik güvenli şifre üret
-        api_password = generate_secure_password(10)
+        api_password = generate_secure_password(8)
         env_updates["API_PASSWORD"] = api_password
         logger.info(f"IPTV API için otomatik şifre üretildi: {api_password}")
 
@@ -250,7 +250,7 @@ def set_api_password(new_password: str) -> str:
     return clean_pass
 
 
-def regenerate_api_password(length: int = 6) -> str:
+def regenerate_api_password(length: int = 8) -> str:
     """Yeni bir sayısal API şifresi (PIN) üretir ve kaydeder."""
     new_pass = generate_secure_password(length)
     settings = load_settings()

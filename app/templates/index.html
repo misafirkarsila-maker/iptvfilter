@@ -574,8 +574,8 @@
           <button class="copy-pill" type="button" onclick="openCustomPassModal()" title="Kendi belirleyeceğiniz sayısal bir PIN şifre girin">
             <span data-i18n="edit_api_pass">✏️ PIN Belirle</span>
           </button>
-          <form action="/settings/regenerate-api-password" method="post" onsubmit="return confirm('Yeni 6 haneli rastgele bir sayısal PIN üretmek istediğinize emin misiniz? IPTV uygulamalarınızdaki şifreyi de güncellemeniz gerekecektir.');" style="margin:0;">
-            <button class="copy-pill" type="submit" title="Yeni bir rastgele 6 haneli sayısal PIN oluşturur">
+          <form action="/settings/regenerate-api-password" method="post" onsubmit="return confirm('Yeni 8 haneli rastgele bir sayısal PIN üretmek istediğinize emin misiniz? IPTV uygulamalarınızdaki şifreyi de güncellemeniz gerekecektir.');" style="margin:0;">
+            <button class="copy-pill" type="submit" title="Yeni bir rastgele 8 haneli sayısal PIN oluşturur">
               <span data-i18n="regen_api_pass">🔄 Yeni PIN Üret</span>
             </button>
           </form>
@@ -598,7 +598,7 @@
         <div class="api-field">
           <div class="api-field-label" data-i18n="password_label">API Şifresi (Sayısal PIN)</div>
           <div class="api-field-val">
-            <span class="api-code" id="apiPassMasked" style="cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">••••••</span>
+            <span class="api-code" id="apiPassMasked" style="cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">••••••••</span>
             <span class="api-code" id="apiPassReal" style="display:none; cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">{{ api_password }}</span>
             <div style="display:flex; gap:4px;">
               <button class="copy-pill" onclick="toggleApiPass()" id="togglePassBtn" title="Göster/Gizle">👁️</button>
@@ -895,7 +895,7 @@
       </div>
 
       <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;" data-i18n="custom_pin_modal_desc">
-        TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 123456 veya 4-8 haneli bir PIN):
+        TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 12345678 veya 4-12 haneli bir PIN):
       </p>
 
       <form action="/settings/custom-api-password" method="post">
@@ -903,7 +903,7 @@
           <label for="custom_api_pin" data-i18n="pin_label">Yeni Sayısal PIN:</label>
           <input type="text" id="custom_api_pin" name="api_password"
                  inputmode="numeric" pattern="[0-9]*" required minlength="4" maxlength="16"
-                 value="{{ api_password }}" placeholder="Örnek: 123456"
+                 value="{{ api_password }}" placeholder="Örnek: 12345678"
                  style="font-size: 1.1rem; letter-spacing: 2px; font-weight: 600;">
         </div>
         <div style="display:flex; gap:10px; justify-content:flex-end;">
@@ -1128,7 +1128,7 @@
     } else if (msg === 'panel_pass_removed') {
       toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel şifresi kaldırıldı. Artık şifresiz açılacaktır.</span></div>';
     } else if (msg === 'api_pass_regenerated') {
-      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Yeni 6 haneli sayısal PIN üretildi ve kaydedildi!</span></div>';
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Yeni 8 haneli sayısal PIN üretildi ve kaydedildi!</span></div>';
     } else if (msg === 'api_pass_updated') {
       toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Sayısal API PIN şifreniz başarıyla kaydedildi!</span></div>';
     } else if (msg === 'provider_added_xtream') {
@@ -1159,7 +1159,7 @@
         "password_label": "API Şifresi (Sayısal PIN)",
         "server_url_label": "Sunucu Adresi (Server URL)",
         "custom_pin_modal_title": "Sayısal API Şifresi (PIN) Belirle",
-        "custom_pin_modal_desc": "TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 123456 veya 4-8 haneli bir PIN):",
+        "custom_pin_modal_desc": "TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 12345678 veya 4-12 haneli bir PIN):",
         "pin_label": "Yeni Sayısal PIN:",
         "save_pin_btn": "PIN'i Kaydet",
         "copy_btn": "Kopyala",
@@ -1212,7 +1212,7 @@
         "password_label": "API Password (PIN)",
         "server_url_label": "Server URL",
         "custom_pin_modal_title": "Set Numeric API Password (PIN)",
-        "custom_pin_modal_desc": "Set a numeric PIN so you can easily type it using a TV remote control (e.g. 123456 or a 4-8 digit PIN):",
+        "custom_pin_modal_desc": "Set a numeric PIN so you can easily type it using a TV remote control (e.g. 12345678 or a 4-12 digit PIN):",
         "pin_label": "New Numeric PIN:",
         "save_pin_btn": "Save PIN",
         "copy_btn": "Copy",
