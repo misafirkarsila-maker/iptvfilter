@@ -48,30 +48,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--card-border);
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 12px;
     }
 
     .brand-area {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .brand-logo {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+      margin: 0;
     }
 
     h2 {
@@ -87,7 +90,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
     }
 
     /* Cards */
@@ -502,49 +506,53 @@
       font-weight: 700;
     }
 
-    /* Topbar Proxy Indicator Pill */
-    .proxy-top-pill {
+    /* Basit Proxy İkon Butonu */
+    .proxy-icon-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 5px 10px;
+      justify-content: center;
+      width: 31px;
+      height: 29px;
       border-radius: var(--radius-md);
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.95rem;
       border: 1px solid var(--card-border);
       background: rgba(0, 0, 0, 0.25);
-      color: var(--mut);
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+      position: relative;
     }
-    .proxy-top-pill:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      color: var(--txt);
+    .proxy-icon-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.05);
     }
-    .proxy-top-pill.active {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.35);
-      color: var(--ok);
+    .proxy-icon-btn.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
-    .proxy-top-dot {
-      width: 7px;
-      height: 7px;
+    .proxy-icon-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background: var(--mut);
-      display: inline-block;
-    }
-    .proxy-top-pill.active .proxy-top-dot {
       background: var(--ok);
-      box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 4px var(--ok);
     }
 
     /* Mobil Uyumluluk (Mobile Responsive) */
     @media (max-width: 680px) {
-      .wrap { padding: 14px 12px 40px; }
-      .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-      .topbar-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; }
-      .topbar-actions .btn { flex: 1; text-align: center; justify-content: center; font-size: 0.78rem; padding: 6px 10px; }
+      .wrap { padding: 12px 10px 40px; }
+      .topbar { gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .brand-logo { font-size: 1.2rem; }
+      h1 { font-size: 1.1rem; }
+      .topbar-actions { gap: 6px; }
+      .topbar-actions .btn { font-size: 0.72rem; padding: 5px 8px; white-space: nowrap; }
       .api-card { padding: 14px; }
       .api-grid { grid-template-columns: 1fr; gap: 8px; }
       .quick-links { padding: 10px; }
@@ -566,13 +574,12 @@
       </div>
 
       <div class="topbar-actions">
-        <!-- Proxy Durum Göstergesi -->
+        <!-- Basit Proxy Durum İkonu -->
         <button type="button" id="topbarProxyPill"
-                class="proxy-top-pill {% if stream_proxy_enabled %}active{% endif %}"
+                class="proxy-icon-btn {% if stream_proxy_enabled %}active{% endif %}"
                 onclick="onProxyBtnClick()"
                 title="{% if stream_proxy_enabled %}Video Proxy: Aktif (Sunucu Üzerinden){% else %}Yayın Modu: 302 Doğrudan (Proxy Kapalı){% endif %}">
-          <span class="proxy-top-dot"></span>
-          <span id="topbarProxyText">{% if stream_proxy_enabled %}🛡️ Proxy: ON{% else %}⚡ 302 Direct{% endif %}</span>
+          <span id="topbarProxyIcon">{% if stream_proxy_enabled %}🛡️{% else %}⚡{% endif %}</span>
         </button>
 
         <!-- Dil Seçici -->
@@ -1088,7 +1095,7 @@
         const d = i18nData[currentL] || i18nData.tr;
 
         const topbarPill = document.getElementById('topbarProxyPill');
-        const topbarText = document.getElementById('topbarProxyText');
+        const topbarIcon = document.getElementById('topbarProxyIcon');
 
         if (data.stream_proxy_enabled) {
           btn.setAttribute('data-enabled', 'true');
@@ -1105,8 +1112,8 @@
             topbarPill.classList.add('active');
             topbarPill.title = 'Video Proxy: Aktif (Sunucu Üzerinden)';
           }
-          if (topbarText) {
-            topbarText.innerText = '🛡️ Proxy: ON';
+          if (topbarIcon) {
+            topbarIcon.innerText = '🛡️';
           }
 
           if (toastArea) {
@@ -1127,8 +1134,8 @@
             topbarPill.classList.remove('active');
             topbarPill.title = 'Yayın Modu: 302 Doğrudan (Proxy Kapalı)';
           }
-          if (topbarText) {
-            topbarText.innerText = '⚡ 302 Direct';
+          if (topbarIcon) {
+            topbarIcon.innerText = '⚡';
           }
 
           if (toastArea) {

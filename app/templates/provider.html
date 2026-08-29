@@ -135,41 +135,42 @@
       font-weight: 700;
     }
 
-    /* Topbar Proxy Indicator Pill */
-    .proxy-top-pill {
+    /* Basit Proxy İkon Butonu */
+    .proxy-icon-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
+      justify-content: center;
+      width: 29px;
+      height: 27px;
       border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 600;
+      font-size: 0.9rem;
       border: 1px solid var(--line);
       background: rgba(0, 0, 0, 0.25);
-      color: var(--mut);
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
+      flex-shrink: 0;
+      position: relative;
     }
-    .proxy-top-pill:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      color: var(--txt);
+    .proxy-icon-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.05);
     }
-    .proxy-top-pill.active {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.35);
-      color: var(--ok);
+    .proxy-icon-btn.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
-    .proxy-top-dot {
-      width: 6px;
-      height: 6px;
+    .proxy-icon-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
-      background: var(--mut);
-      display: inline-block;
-    }
-    .proxy-top-pill.active .proxy-top-dot {
       background: var(--ok);
-      box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 4px var(--ok);
     }
 
     /* Mobil Uyumluluk */
@@ -189,10 +190,9 @@
     <div class="row" style="justify-content:space-between; margin-bottom:8px;">
       <h1>{{ provider.name }}</h1>
       <div style="display:flex; align-items:center; gap:8px;">
-        <a href="/" class="proxy-top-pill {% if stream_proxy_enabled %}active{% endif %}"
+        <a href="/" class="proxy-icon-btn {% if stream_proxy_enabled %}active{% endif %}"
            title="{% if stream_proxy_enabled %}Video Proxy: Aktif (Sunucu Üzerinden){% else %}Yayın Modu: 302 Doğrudan (Proxy Kapalı){% endif %}">
-          <span class="proxy-top-dot"></span>
-          <span>{% if stream_proxy_enabled %}🛡️ Proxy: ON{% else %}⚡ 302 Direct{% endif %}</span>
+          <span>{% if stream_proxy_enabled %}🛡️{% else %}⚡{% endif %}</span>
         </a>
         <div class="lang-switcher">
           <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')">🇹🇷 TR</button>
