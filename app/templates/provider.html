@@ -38,7 +38,7 @@
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       overflow: hidden;
       transition: border-color .15s;
     }
@@ -47,9 +47,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 9px 14px;
       background: rgba(255, 255, 255, 0.025);
-      border-bottom: 1px solid var(--line);
       flex-wrap: wrap;
       gap: 8px;
     }
@@ -62,14 +61,17 @@
       user-select: none;
     }
     .collapse-icon {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--mut);
       display: inline-block;
       width: 14px;
-      transition: transform .15s;
     }
     .cat-group-actions { display: flex; align-items: center; gap: 6px; }
-    .cat-group-body { padding: 10px 12px 6px; background: var(--card-sub); }
+    .cat-group-body {
+      padding: 10px 12px 6px;
+      background: var(--card-sub);
+      border-top: 1px solid var(--line);
+    }
     .cat-group-body.collapsed { display: none; }
 
     /* Tekil Kategori Öğesi */
@@ -87,51 +89,26 @@
     .cat-item input { width:auto; transform:scale(1.2); }
     label.check { display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; }
 
-    /* Arama ve Hızlı Filtre Barı */
+    /* Temiz Arama Barı */
     .filter-bar {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 14px 16px;
+      padding: 12px 16px;
       margin-bottom: 20px;
     }
     .search-input {
       width: 100%;
-      padding: 9px 14px;
+      padding: 10px 14px;
       background: var(--bg);
       border: 1px solid var(--line);
       border-radius: 8px;
       color: var(--txt);
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       outline: none;
       transition: border-color .15s;
     }
     .search-input:focus { border-color: var(--acc); }
-    .country-pills {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 10px;
-    }
-    .country-pill {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      color: var(--mut);
-      border-radius: 16px;
-      padding: 3px 10px;
-      font-size: 0.76rem;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all .15s;
-    }
-    .country-pill:hover { color: var(--txt); border-color: rgba(255,255,255,0.2); }
-    .country-pill.active {
-      background: var(--acc);
-      color: #fff;
-      border-color: var(--acc);
-      font-weight: 600;
-    }
 
     /* Language Switcher */
     .lang-switcher {
@@ -158,7 +135,7 @@
       font-weight: 700;
     }
 
-    /* Mobil Uyumluluk (Mobile Responsive) */
+    /* Mobil Uyumluluk */
     @media (max-width: 640px) {
       .wrap { padding: 12px 10px 40px; }
       h1 { font-size: 1.2rem; }
@@ -198,7 +175,7 @@
       {% endif %}
     </div>
 
-    <!-- Hızlı Arama & Ülke Filtreleme Çubuğu -->
+    <!-- Sade Arama ve Daralt/Genişlet Çubuğu -->
     <div class="filter-bar">
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 220px;">
@@ -212,19 +189,6 @@
           <button type="button" class="btn xs ghost" onclick="toggleAllGroups(true)" data-i18n="expand_all_btn">📂 Hepsini Genişlet</button>
         </div>
       </div>
-
-      <!-- Tespit Edilen Ülke / Üst Başlık Etiketleri -->
-      {% if top_groups %}
-      <div class="country-pills">
-        <span class="mut small" style="font-weight: 500;" data-i18n="quick_filter_lbl">Hızlı Filtre:</span>
-        <button type="button" class="country-pill active" onclick="filterByGroup('ALL', this)" data-i18n="all_pill">Tümü ({{ categories|length }})</button>
-        {% for grp_name, count in top_groups %}
-        <button type="button" class="country-pill" onclick="filterByGroup('{{ grp_name|lower }}', this)">
-          {{ grp_name }} ({{ count }})
-        </button>
-        {% endfor %}
-      </div>
-      {% endif %}
     </div>
 
     <!-- Canlı TV / VOD / Dizi Bölümleri -->
@@ -286,36 +250,128 @@
       });
     }
 
-    // ================= GERÇEK ZAMANLI ARAMA & FİLTRE =================
-    let currentFilterGroup = 'ALL';
+    // ================= ANINDA VE KESİNTİSİZ TOPLU İŞLEM =================
+    function toggleGroupBulk(type, key, action, providerId, groupName) {
+      const card = document.getElementById('grp-card-' + type + '-' + key);
+      if (!card) return;
+      const isEnable = (action === 'enable');
 
-    function filterByGroup(groupNameLower, pillEl) {
-      currentFilterGroup = groupNameLower;
-      document.querySelectorAll('.country-pill').forEach(p => p.classList.remove('active'));
-      if (pillEl) pillEl.classList.add('active');
+      // 1. Gruptaki tüm checkbox'ları ANINDA güncelle (0ms, sıfır sayfa yenilenmesi veya zıplama)
+      const checkboxes = card.querySelectorAll('.cat-group-body input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        cb.checked = isEnable;
+      });
 
-      const searchVal = (document.getElementById('category-search-input').value || '').toLowerCase().trim();
-      applyFilters(searchVal, currentFilterGroup);
+      // 2. Başlıktaki rozet/aktif sayısını hemen güncelle
+      const badge = document.getElementById('badge-' + type + '-' + key);
+      if (badge) {
+        const total = badge.getAttribute('data-total') || checkboxes.length;
+        const activeSpan = badge.querySelector('.active-count');
+        if (activeSpan) {
+          activeSpan.innerText = isEnable ? total : '0';
+        }
+        if (isEnable) {
+          badge.classList.remove('mut');
+          badge.classList.add('ok');
+        } else {
+          badge.classList.remove('ok');
+          badge.classList.add('mut');
+        }
+      }
+
+      // 3. Arka planda sunucuya kaydet
+      const formData = new URLSearchParams();
+      formData.append('action', action);
+      formData.append('provider_id', providerId);
+      formData.append('content_type', type);
+      formData.append('group_name', groupName);
+
+      fetch('/categories/group/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      }).catch(err => console.error('Grup güncelleme hatası:', err));
     }
 
+    function toggleSectionBulk(type, action, providerId) {
+      const section = document.getElementById('section-' + type);
+      if (!section) return;
+      const isEnable = (action === 'enable');
+
+      // Bölümdeki tüm checkbox'ları güncelle
+      section.querySelectorAll('.cat-group-body input[type="checkbox"]').forEach(cb => {
+        cb.checked = isEnable;
+      });
+
+      // Bölümdeki tüm grup rozetlerini güncelle
+      section.querySelectorAll('.cat-group-header .badge').forEach(badge => {
+        const total = badge.getAttribute('data-total') || '0';
+        const activeSpan = badge.querySelector('.active-count');
+        if (activeSpan) {
+          activeSpan.innerText = isEnable ? total : '0';
+        }
+        if (isEnable) {
+          badge.classList.remove('mut');
+          badge.classList.add('ok');
+        } else {
+          badge.classList.remove('ok');
+          badge.classList.add('mut');
+        }
+      });
+
+      // Arka planda kaydet
+      const formData = new URLSearchParams();
+      formData.append('action', action);
+      formData.append('provider_id', providerId);
+
+      fetch('/categories/' + type + '/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      }).catch(err => console.error('Bölüm güncelleme hatası:', err));
+    }
+
+    function onSingleCategoryToggle(checkbox, type, groupKey, catId) {
+      // Arka planda kaydet
+      fetch('/categories/' + catId + '/toggle', { method: 'POST' });
+
+      // İlgili grubun rozetini güncelle
+      const card = document.getElementById('grp-card-' + type + '-' + groupKey);
+      if (!card) return;
+      const checkboxes = card.querySelectorAll('.cat-group-body input[type="checkbox"]');
+      let checkedCount = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) checkedCount++;
+      });
+
+      const badge = document.getElementById('badge-' + type + '-' + groupKey);
+      if (badge) {
+        const activeSpan = badge.querySelector('.active-count');
+        if (activeSpan) activeSpan.innerText = checkedCount;
+        if (checkedCount > 0) {
+          badge.classList.remove('mut');
+          badge.classList.add('ok');
+        } else {
+          badge.classList.remove('ok');
+          badge.classList.add('mut');
+        }
+      }
+    }
+
+    // ================= GERÇEK ZAMANLI ARAMA =================
     function filterCategoriesRealtime(query) {
       const searchVal = (query || '').toLowerCase().trim();
-      applyFilters(searchVal, currentFilterGroup);
-    }
 
-    function applyFilters(query, groupFilter) {
       document.querySelectorAll('.cat-group-card').forEach(card => {
         const groupName = card.getAttribute('data-group-name') || '';
-        const matchesGroup = (groupFilter === 'ALL' || groupName.includes(groupFilter));
-
         let anyCatVisible = false;
         const catItems = card.querySelectorAll('.cat-item-wrap');
 
         catItems.forEach(item => {
           const catName = item.getAttribute('data-cat-name') || '';
-          const matchesQuery = (!query || catName.includes(query) || groupName.includes(query));
+          const matchesQuery = (!searchVal || catName.includes(searchVal) || groupName.includes(searchVal));
 
-          if (matchesGroup && matchesQuery) {
+          if (matchesQuery) {
             item.style.display = 'block';
             anyCatVisible = true;
           } else {
@@ -323,16 +379,17 @@
           }
         });
 
-        // Kart görünürlüğü: İçinde eşleşen kategori varsa veya arama doğrudan grup adıyla eşleşiyorsa
-        if (matchesGroup && anyCatVisible) {
+        if (!searchVal) {
+          // Arama boşsa tüm gruplar görünsün, ancak orijinal kapalı hallerine dönsünler
           card.style.display = 'block';
-          // Arama yapılıyorsa otomatik genişlet
-          if (query.length > 0) {
-            const body = card.querySelector('.cat-group-body');
-            if (body) body.classList.remove('collapsed');
-            const arrow = card.querySelector('.collapse-icon');
-            if (arrow) arrow.innerText = '▼';
-          }
+          catItems.forEach(item => item.style.display = 'block');
+        } else if (anyCatVisible) {
+          card.style.display = 'block';
+          // Arama yapılıyorsa eşleşen grubun gövdesini otomatik aç
+          const body = card.querySelector('.cat-group-body');
+          if (body) body.classList.remove('collapsed');
+          const arrow = card.querySelector('.collapse-icon');
+          if (arrow) arrow.innerText = '▼';
         } else {
           card.style.display = 'none';
         }
@@ -376,8 +433,6 @@
         "search_placeholder": "🔍 Kategori veya Ülke Ara (örn: DE, TR, Sinema, Netflix...)",
         "collapse_all_btn": "📁 Hepsini Daralt",
         "expand_all_btn": "📂 Hepsini Genişlet",
-        "quick_filter_lbl": "Hızlı Filtre:",
-        "all_pill": "Tümü",
         "collapse_lbl": "📁 Daralt",
         "expand_lbl": "📂 Genişlet",
         "select_all_btn": "Tümünü Seç",
@@ -401,8 +456,6 @@
         "search_placeholder": "🔍 Search categories or countries (e.g. DE, TR, Movies, Netflix...)",
         "collapse_all_btn": "📁 Collapse All",
         "expand_all_btn": "📂 Expand All",
-        "quick_filter_lbl": "Quick Filter:",
-        "all_pill": "All",
         "collapse_lbl": "📁 Collapse",
         "expand_lbl": "📂 Expand",
         "select_all_btn": "Select All",

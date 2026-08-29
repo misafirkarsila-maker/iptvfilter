@@ -352,27 +352,9 @@ async def provider_detail(request: Request, provider_id: int, db: Session = Depe
     cats = _sort_cats(db, provider_id)
     streams = db.query(Stream).filter(Stream.provider_id == provider_id).count()
 
-    seen_groups = {}
-    for c in cats:
-        grp = c.parent_name or detect_category_group(c.name)
-        seen_groups[grp] = seen_groups.get(grp, 0) + 1
-
-    def grp_pill_sort(item):
-        name, cnt = item
-        if "TR /" in name or "TÜRKİYE" in name: return (0, -cnt)
-        if "DE /" in name or "DEUTSCHLAND" in name: return (1, -cnt)
-        if "FR /" in name or "FRANCE" in name: return (2, -cnt)
-        if "UK /" in name or "USA /" in name: return (3, -cnt)
-        if "NL /" in name or "IT /" in name or "ES /" in name: return (4, -cnt)
-        if "ADULT" in name: return (99, -cnt)
-        if "DİĞER" in name: return (98, -cnt)
-        return (10, -cnt)
-
-    top_groups = sorted(seen_groups.items(), key=grp_pill_sort)
-
     return templates.TemplateResponse(
         request, "provider.html",
-        {"provider": provider, "categories": cats, "streams": streams, "top_groups": top_groups, "req": request}
+        {"provider": provider, "categories": cats, "streams": streams, "req": request}
     )
 
 @router.post("/categories/{category_id}/toggle")
@@ -384,6 +366,7 @@ async def toggle_category(category_id: int, db: Session = Depends(get_db)):
         db.commit()
         db.query(Stream).filter(Stream.category_id == cat.id).update({"enabled": cat.enabled})
         db.commit()
+        return {"status": "ok", "category_id": cat.id, "enabled": cat.enabled}
     return RedirectResponse(f"/providers/{cat.provider_id}" if cat else "/", status_code=303)
 
 @router.post("/categories/group/bulk")
@@ -419,12 +402,14 @@ async def bulk_toggle_group_categories(
         )
         db.commit()
 
-    provider = db.query(Provider).get(provider_id)
-    cats = [c for c in _sort_cats(db, provider_id) if c.content_type == content_type]
-    return templates.TemplateResponse(
-        request, "partials/category_section.html",
-        {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
-    )
+    if request.headers.get("hx-request") == "true":
+        provider = db.query(Provider).get(provider_id)
+        cats = [c for c in _sort_cats(db, provider_id) if c.content_type == content_type]
+        return templates.TemplateResponse(
+            request, "partials/category_section.html",
+            {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
+        )
+    return {"status": "ok", "enabled": enable, "count": len(target_cat_ids)}
 
 @router.post("/categories/{content_type}/bulk")
 async def bulk_toggle_categories(
@@ -446,13 +431,15 @@ async def bulk_toggle_categories(
         Stream.is_active == True
     ).update({"enabled": enable})
     db.commit()
-    # Sadece o content_type'a ait partial section'ı döndür
-    provider = db.query(Provider).get(provider_id)
-    cats = [c for c in _sort_cats(db, provider_id) if c.content_type == content_type]
-    return templates.TemplateResponse(
-        request, "partials/category_section.html",
-        {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
-    )
+    
+    if request.headers.get("hx-request") == "true":
+        provider = db.query(Provider).get(provider_id)
+        cats = [c for c in _sort_cats(db, provider_id) if c.content_type == content_type]
+        return templates.TemplateResponse(
+            request, "partials/category_section.html",
+            {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
+        )
+    return {"status": "ok", "enabled": enable}
 
 @router.post("/providers/{provider_id}/group/bulk")
 async def bulk_toggle_provider_group(

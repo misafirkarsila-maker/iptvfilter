@@ -13,14 +13,10 @@
       <button class="btn xs ghost" type="button" onclick="toggleSectionGroups('{{ type }}', false)" title="Bu bölümdeki tüm grupları daralt" data-i18n="collapse_lbl">📁 Daralt</button>
       <button class="btn xs ghost" type="button" onclick="toggleSectionGroups('{{ type }}', true)" title="Bu bölümdeki tüm grupları genişlet" data-i18n="expand_lbl">📂 Genişlet</button>
       <button class="btn xs" type="button"
-              hx-post="/categories/{{ type }}/bulk"
-              hx-vals='{"action":"enable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-              hx-target="#section-{{ type }}" hx-swap="outerHTML"
+              onclick="toggleSectionBulk('{{ type }}', 'enable', {{ provider.id }})"
               data-i18n="select_all_btn">Tümünü Seç</button>
       <button class="btn xs ghost" type="button"
-              hx-post="/categories/{{ type }}/bulk"
-              hx-vals='{"action":"disable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-              hx-target="#section-{{ type }}" hx-swap="outerHTML"
+              onclick="toggleSectionBulk('{{ type }}', 'disable', {{ provider.id }})"
               data-i18n="remove_all_btn">Tümünü Kaldır</button>
     </div>
   </div>
@@ -30,25 +26,24 @@
     <!-- Grup Üst Başlığı -->
     <div class="cat-group-header">
       <div class="cat-group-info" onclick="toggleGroupCollapse('{{ type }}', '{{ grp.key }}')" style="cursor: pointer;" title="Daralt / Genişlet">
-        <span class="collapse-icon" id="arrow-{{ type }}-{{ grp.key }}">▼</span>
+        <span class="collapse-icon" id="arrow-{{ type }}-{{ grp.key }}">▶</span>
         <span class="cat-group-title">{{ grp.name }}</span>
-        <span class="badge {% if grp.enabled_count > 0 %}ok{% else %}mut{% endif %} sm" style="font-size: 0.75rem;">
-          {{ grp.enabled_count }}/{{ grp.total_count }} <span data-i18n="active_lbl">aktif</span>
+        <span class="badge {% if grp.enabled_count > 0 %}ok{% else %}mut{% endif %} sm"
+              id="badge-{{ type }}-{{ grp.key }}"
+              data-total="{{ grp.total_count }}"
+              style="font-size: 0.75rem;">
+          <span class="active-count">{{ grp.enabled_count }}</span>/{{ grp.total_count }} <span data-i18n="active_lbl">aktif</span>
         </span>
       </div>
       <div class="cat-group-actions">
         <button class="btn xs" type="button"
-                hx-post="/categories/group/bulk"
-                hx-vals='{"action":"enable","provider_id":{{ provider.id }},"content_type":"{{ type }}","group_name":"{{ grp.name }}"}'
-                hx-target="#section-{{ type }}" hx-swap="outerHTML"
+                onclick="toggleGroupBulk('{{ type }}', '{{ grp.key }}', 'enable', {{ provider.id }}, '{{ grp.name }}')"
                 title="{{ grp.name }} grubundaki tüm kategorileri aç"
                 data-i18n="enable_group_btn">
           Tümünü Aç
         </button>
         <button class="btn xs ghost" type="button"
-                hx-post="/categories/group/bulk"
-                hx-vals='{"action":"disable","provider_id":{{ provider.id }},"content_type":"{{ type }}","group_name":"{{ grp.name }}"}'
-                hx-target="#section-{{ type }}" hx-swap="outerHTML"
+                onclick="toggleGroupBulk('{{ type }}', '{{ grp.key }}', 'disable', {{ provider.id }}, '{{ grp.name }}')"
                 title="{{ grp.name }} grubundaki tüm kategorileri kapat"
                 data-i18n="disable_group_btn">
           Tümünü Kapat
@@ -56,8 +51,8 @@
       </div>
     </div>
 
-    <!-- Grup İçindeki Kategoriler -->
-    <div class="cat-group-body" id="grp-body-{{ type }}-{{ grp.key }}">
+    <!-- Grup İçindeki Kategoriler (Varsayılan: kapalı/collapsed) -->
+    <div class="cat-group-body collapsed" id="grp-body-{{ type }}-{{ grp.key }}">
       {% for cat in grp.categories %}
       <div class="cat-item-wrap" data-cat-name="{{ cat.name|lower }}" style="margin-bottom: 6px;">
         <div class="cat-item" style="margin-bottom: 0;">
@@ -72,15 +67,13 @@
                     hx-target="#section-{{ type }}" hx-swap="outerHTML">▼</button>
           </div>
 
-          <form action="/categories/{{ cat.id }}/toggle" method="post" style="flex: 1; margin: 0;">
-            <label class="check" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-              <input type="checkbox" name="enabled" {% if cat.enabled %}checked{% endif %}
-                     onchange="fetch('/categories/{{ cat.id }}/toggle',{method:'POST'}).then(()=>{})">
-              <span style="font-weight: 500;">{{ cat.name }}</span>
-              {% if cat.is_new %}<span class="new-tag" data-i18n="new_tag">Yeni</span>{% endif %}
-              {% if not cat.is_active %}<span class="inactive-tag" data-i18n="inactive_tag">(kaldırıldı)</span>{% endif %}
-            </label>
-          </form>
+          <label class="check" style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; margin: 0;">
+            <input type="checkbox" name="enabled" {% if cat.enabled %}checked{% endif %}
+                   onchange="onSingleCategoryToggle(this, '{{ type }}', '{{ grp.key }}', '{{ cat.id }}')">
+            <span style="font-weight: 500;">{{ cat.name }}</span>
+            {% if cat.is_new %}<span class="new-tag" data-i18n="new_tag">Yeni</span>{% endif %}
+            {% if not cat.is_active %}<span class="inactive-tag" data-i18n="inactive_tag">(kaldırıldı)</span>{% endif %}
+          </label>
 
           <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
             {% if type == 'live' %}
