@@ -1,58 +1,105 @@
-<!-- Kategori type-section içeriği (Live / VOD / Series ayrı ayrı render edilir) -->
+<!-- Kategori type-section içeriği (Live / VOD / Series gruplu render edilir) -->
 {% set type = content_type or (categories[0].content_type if categories else 'live') %}
 {% set cat_list = section_cats if section_cats is defined else categories %}
+{% set groups = build_category_groups(cat_list) %}
+
 <div class="type-section" id="section-{{ type }}" data-type="{{ type }}">
   <div class="type-header">
-    <h2>{% if type=='live' %}📺 Live TV{% elif type=='vod' %}🎬 VOD{% else %}📺 Series{% endif %}</h2>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <h2>{% if type=='live' %}📺 Live TV{% elif type=='vod' %}🎬 VOD{% else %}📺 Series{% endif %}</h2>
+      <span class="badge mut small" style="font-size: 0.72rem;">{{ cat_list|length }} kat · {{ groups|length }} grup</span>
+    </div>
     <div class="row" style="gap:6px;">
+      <button class="btn xs ghost" type="button" onclick="toggleSectionGroups('{{ type }}', false)" title="Bu bölümdeki tüm grupları daralt" data-i18n="collapse_lbl">📁 Daralt</button>
+      <button class="btn xs ghost" type="button" onclick="toggleSectionGroups('{{ type }}', true)" title="Bu bölümdeki tüm grupları genişlet" data-i18n="expand_lbl">📂 Genişlet</button>
       <button class="btn xs" type="button"
               hx-post="/categories/{{ type }}/bulk"
               hx-vals='{"action":"enable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-              hx-target="#section-{{ type }}" hx-swap="outerHTML">Tümünü Seç</button>
+              hx-target="#section-{{ type }}" hx-swap="outerHTML"
+              data-i18n="select_all_btn">Tümünü Seç</button>
       <button class="btn xs ghost" type="button"
               hx-post="/categories/{{ type }}/bulk"
               hx-vals='{"action":"disable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-              hx-target="#section-{{ type }}" hx-swap="outerHTML">Tümünü Kaldır</button>
+              hx-target="#section-{{ type }}" hx-swap="outerHTML"
+              data-i18n="remove_all_btn">Tümünü Kaldır</button>
     </div>
   </div>
-  {% for cat in cat_list %}
-  <div style="margin-bottom: 6px;">
-    <div class="cat-item" style="margin-bottom: 0;">
-      <div style="display: flex; gap: 3px; margin-right: 4px; flex-shrink: 0;">
-        <button class="btn xs ghost" style="padding: 2px 6px; font-size: 0.68rem;" type="button" title="Yukarı Taşı"
-                hx-post="/categories/{{ cat.id }}/sort"
-                hx-vals='{"direction":"up","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-                hx-target="#section-{{ type }}" hx-swap="outerHTML">▲</button>
-        <button class="btn xs ghost" style="padding: 2px 6px; font-size: 0.68rem;" type="button" title="Aşağı Taşı"
-                hx-post="/categories/{{ cat.id }}/sort"
-                hx-vals='{"direction":"down","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
-                hx-target="#section-{{ type }}" hx-swap="outerHTML">▼</button>
+
+  {% for grp in groups %}
+  <div class="cat-group-card" id="grp-card-{{ type }}-{{ grp.key }}" data-group-name="{{ grp.name|lower }}" data-type="{{ type }}">
+    <!-- Grup Üst Başlığı -->
+    <div class="cat-group-header">
+      <div class="cat-group-info" onclick="toggleGroupCollapse('{{ type }}', '{{ grp.key }}')" style="cursor: pointer;" title="Daralt / Genişlet">
+        <span class="collapse-icon" id="arrow-{{ type }}-{{ grp.key }}">▼</span>
+        <span class="cat-group-title">{{ grp.name }}</span>
+        <span class="badge {% if grp.enabled_count > 0 %}ok{% else %}mut{% endif %} sm" style="font-size: 0.75rem;">
+          {{ grp.enabled_count }}/{{ grp.total_count }} <span data-i18n="active_lbl">aktif</span>
+        </span>
       </div>
-
-      <form action="/categories/{{ cat.id }}/toggle" method="post" style="flex: 1; margin: 0;">
-        <label class="check" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-          <input type="checkbox" name="enabled" {% if cat.enabled %}checked{% endif %}
-                 onchange="fetch('/categories/{{ cat.id }}/toggle',{method:'POST'}).then(()=>{})">
-          <span style="font-weight: 500;">{{ cat.name }}</span>
-          {% if cat.is_new %}<span class="new-tag">Yeni</span>{% endif %}
-          {% if not cat.is_active %}<span class="inactive-tag">(kaldırıldı)</span>{% endif %}
-        </label>
-      </form>
-
-      <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
-        {% if type == 'live' %}
-        <button class="btn xs ghost" type="button"
-                style="padding: 3px 9px; font-size: 0.72rem; color: #93c5fd; border: 1px solid rgba(79,140,255,0.4); background: rgba(79,140,255,0.08);"
-                onclick="toggleCategoryChannels('{{ cat.id }}')">
-          📺 Kanallar
+      <div class="cat-group-actions">
+        <button class="btn xs" type="button"
+                hx-post="/categories/group/bulk"
+                hx-vals='{"action":"enable","provider_id":{{ provider.id }},"content_type":"{{ type }}","group_name":"{{ grp.name }}"}'
+                hx-target="#section-{{ type }}" hx-swap="outerHTML"
+                title="{{ grp.name }} grubundaki tüm kategorileri aç"
+                data-i18n="enable_group_btn">
+          Tümünü Aç
         </button>
-        {% endif %}
-        <span class="mut small" style="font-size: 0.75rem;">#{{ cat.provider_category_id }}</span>
+        <button class="btn xs ghost" type="button"
+                hx-post="/categories/group/bulk"
+                hx-vals='{"action":"disable","provider_id":{{ provider.id }},"content_type":"{{ type }}","group_name":"{{ grp.name }}"}'
+                hx-target="#section-{{ type }}" hx-swap="outerHTML"
+                title="{{ grp.name }} grubundaki tüm kategorileri kapat"
+                data-i18n="disable_group_btn">
+          Tümünü Kapat
+        </button>
       </div>
     </div>
-    <div id="cat-streams-box-{{ cat.id }}"></div>
+
+    <!-- Grup İçindeki Kategoriler -->
+    <div class="cat-group-body" id="grp-body-{{ type }}-{{ grp.key }}">
+      {% for cat in grp.categories %}
+      <div class="cat-item-wrap" data-cat-name="{{ cat.name|lower }}" style="margin-bottom: 6px;">
+        <div class="cat-item" style="margin-bottom: 0;">
+          <div style="display: flex; gap: 3px; margin-right: 4px; flex-shrink: 0;">
+            <button class="btn xs ghost" style="padding: 2px 6px; font-size: 0.68rem;" type="button" title="Yukarı Taşı"
+                    hx-post="/categories/{{ cat.id }}/sort"
+                    hx-vals='{"direction":"up","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
+                    hx-target="#section-{{ type }}" hx-swap="outerHTML">▲</button>
+            <button class="btn xs ghost" style="padding: 2px 6px; font-size: 0.68rem;" type="button" title="Aşağı Taşı"
+                    hx-post="/categories/{{ cat.id }}/sort"
+                    hx-vals='{"direction":"down","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
+                    hx-target="#section-{{ type }}" hx-swap="outerHTML">▼</button>
+          </div>
+
+          <form action="/categories/{{ cat.id }}/toggle" method="post" style="flex: 1; margin: 0;">
+            <label class="check" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" name="enabled" {% if cat.enabled %}checked{% endif %}
+                     onchange="fetch('/categories/{{ cat.id }}/toggle',{method:'POST'}).then(()=>{})">
+              <span style="font-weight: 500;">{{ cat.name }}</span>
+              {% if cat.is_new %}<span class="new-tag" data-i18n="new_tag">Yeni</span>{% endif %}
+              {% if not cat.is_active %}<span class="inactive-tag" data-i18n="inactive_tag">(kaldırıldı)</span>{% endif %}
+            </label>
+          </form>
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
+            {% if type == 'live' %}
+            <button class="btn xs ghost" type="button"
+                    style="padding: 3px 9px; font-size: 0.72rem; color: #93c5fd; border: 1px solid rgba(79,140,255,0.4); background: rgba(79,140,255,0.08);"
+                    onclick="toggleCategoryChannels('{{ cat.id }}')"
+                    data-i18n="channels_btn">
+              📺 Kanallar
+            </button>
+            {% endif %}
+            <span class="mut small" style="font-size: 0.75rem;">#{{ cat.provider_category_id }}</span>
+          </div>
+        </div>
+        <div id="cat-streams-box-{{ cat.id }}"></div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
   {% else %}
-  <div class="mut small">Bu kategoride içerik yok.</div>
+  <div class="mut small" data-i18n="no_content_lbl">Bu kategoride içerik yok.</div>
   {% endfor %}
 </div>

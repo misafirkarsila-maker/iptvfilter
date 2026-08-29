@@ -6,30 +6,132 @@
   <title>{{ provider.name }} - Kategoriler</title>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <style>
-    :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2e37; --txt:#e6e8eb; --mut:#8a909c; --acc:#4f8cff; --ok:#2ecc71; --err:#e74c3c; --new:#f39c12; }
+    :root {
+      --bg:#0f1115; --card:#1a1d24; --line:#2a2e37; --txt:#e6e8eb;
+      --mut:#8a909c; --acc:#4f8cff; --ok:#2ecc71; --err:#e74c3c; --new:#f39c12;
+      --card-sub: #14171d;
+    }
     * { box-sizing:border-box; }
     body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--txt); }
-    .wrap { max-width:1000px; margin:0 auto; padding:24px; }
+    .wrap { max-width:1040px; margin:0 auto; padding:24px; }
     h1 { font-size:1.4rem; } 
     .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:16px; }
-    .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:.75rem; }
-    .badge.ok { background:rgba(46,204,113,.15); color:var(--ok); }
-    .badge.err { background:rgba(231,76,60,.15); color:var(--err); }
-    .badge.new { background:rgba(243,156,18,.15); color:var(--new); }
+    .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:.75rem; font-weight:500; }
+    .badge.ok { background:rgba(46,204,113,.15); color:var(--ok); border:1px solid rgba(46,204,113,.3); }
+    .badge.err { background:rgba(231,76,60,.15); color:var(--err); border:1px solid rgba(231,76,60,.3); }
+    .badge.new { background:rgba(243,156,18,.15); color:var(--new); border:1px solid rgba(243,156,18,.3); }
     .new-tag { color:var(--new); font-size:.7rem; font-weight:600; text-transform:uppercase; }
     .inactive-tag { color:var(--mut); font-size:.7rem; text-transform:uppercase; }
     .mut { color:var(--mut); } .small { font-size:.8rem; }
-    .btn { background:var(--acc); color:#fff; border:0; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:.85rem; text-decoration:none; display:inline-block; }
+    .btn { background:var(--acc); color:#fff; border:0; border-radius:8px; padding:8px 14px; cursor:pointer; font-size:.85rem; text-decoration:none; display:inline-block; font-weight:500; transition:all .15s; }
+    .btn:hover { filter:brightness(1.1); }
     .btn.ghost { background:var(--line); color:var(--txt); }
     .btn.sm { padding:4px 10px; font-size:.78rem; }
     .btn.xs { padding:3px 8px; font-size:.68rem; }
     .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .type-section { margin-bottom:24px; }
-    .type-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-    .type-header h2 { font-size:1rem; color:var(--mut); text-transform:uppercase; letter-spacing:.5px; margin:0; }
-    .cat-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:6px; background:var(--bg); }
+    .type-section { margin-bottom:28px; }
+    .type-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .type-header h2 { font-size:1.1rem; color:var(--txt); margin:0; }
+    
+    /* Üst Başlık / Grup Kartı */
+    .cat-group-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .cat-group-card:hover { border-color: rgba(255,255,255,0.14); }
+    .cat-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.025);
+      border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .cat-group-info {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      user-select: none;
+    }
+    .collapse-icon {
+      font-size: 0.75rem;
+      color: var(--mut);
+      display: inline-block;
+      width: 14px;
+      transition: transform .15s;
+    }
+    .cat-group-actions { display: flex; align-items: center; gap: 6px; }
+    .cat-group-body { padding: 10px 12px 6px; background: var(--card-sub); }
+    .cat-group-body.collapsed { display: none; }
+
+    /* Tekil Kategori Öğesi */
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      background: var(--bg);
+      transition: background .12s;
+    }
+    .cat-item:hover { background: rgba(255,255,255,0.02); }
     .cat-item input { width:auto; transform:scale(1.2); }
     label.check { display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; }
+
+    /* Arama ve Hızlı Filtre Barı */
+    .filter-bar {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 9px 14px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--txt);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--acc); }
+    .country-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .country-pill {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      color: var(--mut);
+      border-radius: 16px;
+      padding: 3px 10px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .country-pill:hover { color: var(--txt); border-color: rgba(255,255,255,0.2); }
+    .country-pill.active {
+      background: var(--acc);
+      color: #fff;
+      border-color: var(--acc);
+      font-weight: 600;
+    }
 
     /* Language Switcher */
     .lang-switcher {
@@ -61,6 +163,8 @@
       .wrap { padding: 12px 10px 40px; }
       h1 { font-size: 1.2rem; }
       .cat-item { padding: 8px 10px; gap: 8px; flex-wrap: wrap; }
+      .cat-group-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .cat-group-actions { width: 100%; justify-content: flex-end; }
       .type-header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .type-header .row { width: 100%; justify-content: flex-end; }
     }
@@ -78,6 +182,8 @@
         <a class="btn ghost sm" href="/" data-i18n="back_btn">← Geri</a>
       </div>
     </div>
+
+    <!-- Sağlayıcı Bilgi Özeti -->
     <div class="card small mut">
       <span data-i18n="server_lbl">Sunucu:</span> <code>{{ provider.server_url }}</code> · 
       <span data-i18n="user_lbl">Kullanıcı:</span> <code>{{ provider.username }}</code> ·
@@ -92,6 +198,36 @@
       {% endif %}
     </div>
 
+    <!-- Hızlı Arama & Ülke Filtreleme Çubuğu -->
+    <div class="filter-bar">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 220px;">
+          <input type="text" id="category-search-input" class="search-input"
+                 placeholder="🔍 Kategori veya Ülke Ara (örn: DE, TR, Sinema, Netflix...)"
+                 oninput="filterCategoriesRealtime(this.value)"
+                 data-i18n-placeholder="search_placeholder">
+        </div>
+        <div style="display: flex; gap: 6px; flex-shrink: 0;">
+          <button type="button" class="btn xs ghost" onclick="toggleAllGroups(false)" data-i18n="collapse_all_btn">📁 Hepsini Daralt</button>
+          <button type="button" class="btn xs ghost" onclick="toggleAllGroups(true)" data-i18n="expand_all_btn">📂 Hepsini Genişlet</button>
+        </div>
+      </div>
+
+      <!-- Tespit Edilen Ülke / Üst Başlık Etiketleri -->
+      {% if top_groups %}
+      <div class="country-pills">
+        <span class="mut small" style="font-weight: 500;" data-i18n="quick_filter_lbl">Hızlı Filtre:</span>
+        <button type="button" class="country-pill active" onclick="filterByGroup('ALL', this)" data-i18n="all_pill">Tümü ({{ categories|length }})</button>
+        {% for grp_name, count in top_groups %}
+        <button type="button" class="country-pill" onclick="filterByGroup('{{ grp_name|lower }}', this)">
+          {{ grp_name }} ({{ count }})
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Canlı TV / VOD / Dizi Bölümleri -->
     <div id="category-sections">
       {% set types = ('live','vod','series') %}
       {% for ctype in types %}
@@ -101,12 +237,109 @@
       {% endfor %}
     </div>
 
-    <div class="card small mut">
+    <div class="card small mut" data-i18n="footer_note">
       Bu sağlayıcı için aktif kategoriler kendi Xtream API'ne otomatik yansır.
     </div>
   </div>
 
   <script>
+    // ================= GRUP DARALT / GENİŞLET =================
+    function toggleGroupCollapse(type, key) {
+      const body = document.getElementById('grp-body-' + type + '-' + key);
+      const arrow = document.getElementById('arrow-' + type + '-' + key);
+      if (!body) return;
+      const isCollapsed = body.classList.contains('collapsed');
+      if (isCollapsed) {
+        body.classList.remove('collapsed');
+        if (arrow) arrow.innerText = '▼';
+      } else {
+        body.classList.add('collapsed');
+        if (arrow) arrow.innerText = '▶';
+      }
+    }
+
+    function toggleSectionGroups(type, expand) {
+      const section = document.getElementById('section-' + type);
+      if (!section) return;
+      section.querySelectorAll('.cat-group-body').forEach(body => {
+        if (expand) {
+          body.classList.remove('collapsed');
+        } else {
+          body.classList.add('collapsed');
+        }
+      });
+      section.querySelectorAll('.collapse-icon').forEach(icon => {
+        icon.innerText = expand ? '▼' : '▶';
+      });
+    }
+
+    function toggleAllGroups(expand) {
+      document.querySelectorAll('.cat-group-body').forEach(body => {
+        if (expand) {
+          body.classList.remove('collapsed');
+        } else {
+          body.classList.add('collapsed');
+        }
+      });
+      document.querySelectorAll('.collapse-icon').forEach(icon => {
+        icon.innerText = expand ? '▼' : '▶';
+      });
+    }
+
+    // ================= GERÇEK ZAMANLI ARAMA & FİLTRE =================
+    let currentFilterGroup = 'ALL';
+
+    function filterByGroup(groupNameLower, pillEl) {
+      currentFilterGroup = groupNameLower;
+      document.querySelectorAll('.country-pill').forEach(p => p.classList.remove('active'));
+      if (pillEl) pillEl.classList.add('active');
+
+      const searchVal = (document.getElementById('category-search-input').value || '').toLowerCase().trim();
+      applyFilters(searchVal, currentFilterGroup);
+    }
+
+    function filterCategoriesRealtime(query) {
+      const searchVal = (query || '').toLowerCase().trim();
+      applyFilters(searchVal, currentFilterGroup);
+    }
+
+    function applyFilters(query, groupFilter) {
+      document.querySelectorAll('.cat-group-card').forEach(card => {
+        const groupName = card.getAttribute('data-group-name') || '';
+        const matchesGroup = (groupFilter === 'ALL' || groupName.includes(groupFilter));
+
+        let anyCatVisible = false;
+        const catItems = card.querySelectorAll('.cat-item-wrap');
+
+        catItems.forEach(item => {
+          const catName = item.getAttribute('data-cat-name') || '';
+          const matchesQuery = (!query || catName.includes(query) || groupName.includes(query));
+
+          if (matchesGroup && matchesQuery) {
+            item.style.display = 'block';
+            anyCatVisible = true;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        // Kart görünürlüğü: İçinde eşleşen kategori varsa veya arama doğrudan grup adıyla eşleşiyorsa
+        if (matchesGroup && anyCatVisible) {
+          card.style.display = 'block';
+          // Arama yapılıyorsa otomatik genişlet
+          if (query.length > 0) {
+            const body = card.querySelector('.cat-group-body');
+            if (body) body.classList.remove('collapsed');
+            const arrow = card.querySelector('.collapse-icon');
+            if (arrow) arrow.innerText = '▼';
+          }
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // ================= KANAL ÇEKMECESİ =================
     function toggleCategoryChannels(catId) {
       const box = document.getElementById('cat-streams-box-' + catId);
       const wasOpen = box && box.innerHTML.trim().length > 0;
@@ -139,7 +372,24 @@
         "user_lbl": "Kullanıcı:",
         "total_content_lbl": "Toplam içerik:",
         "last_sync_lbl": "Son senkronizasyon:",
-        "status_lbl": "Durum:"
+        "status_lbl": "Durum:",
+        "search_placeholder": "🔍 Kategori veya Ülke Ara (örn: DE, TR, Sinema, Netflix...)",
+        "collapse_all_btn": "📁 Hepsini Daralt",
+        "expand_all_btn": "📂 Hepsini Genişlet",
+        "quick_filter_lbl": "Hızlı Filtre:",
+        "all_pill": "Tümü",
+        "collapse_lbl": "📁 Daralt",
+        "expand_lbl": "📂 Genişlet",
+        "select_all_btn": "Tümünü Seç",
+        "remove_all_btn": "Tümünü Kaldır",
+        "enable_group_btn": "Tümünü Aç",
+        "disable_group_btn": "Tümünü Kapat",
+        "active_lbl": "aktif",
+        "new_tag": "Yeni",
+        "inactive_tag": "(kaldırıldı)",
+        "channels_btn": "📺 Kanallar",
+        "no_content_lbl": "Bu kategoride içerik yok.",
+        "footer_note": "Bu sağlayıcı için aktif kategoriler kendi Xtream API'ne otomatik yansır."
       },
       en: {
         "back_btn": "← Back",
@@ -147,7 +397,24 @@
         "user_lbl": "User:",
         "total_content_lbl": "Total streams:",
         "last_sync_lbl": "Last sync:",
-        "status_lbl": "Status:"
+        "status_lbl": "Status:",
+        "search_placeholder": "🔍 Search categories or countries (e.g. DE, TR, Movies, Netflix...)",
+        "collapse_all_btn": "📁 Collapse All",
+        "expand_all_btn": "📂 Expand All",
+        "quick_filter_lbl": "Quick Filter:",
+        "all_pill": "All",
+        "collapse_lbl": "📁 Collapse",
+        "expand_lbl": "📂 Expand",
+        "select_all_btn": "Select All",
+        "remove_all_btn": "Deselect All",
+        "enable_group_btn": "Enable All",
+        "disable_group_btn": "Disable All",
+        "active_lbl": "active",
+        "new_tag": "New",
+        "inactive_tag": "(removed)",
+        "channels_btn": "📺 Channels",
+        "no_content_lbl": "No content in this category.",
+        "footer_note": "Active categories for this provider automatically reflect in your Xtream API."
       }
     };
 
@@ -162,6 +429,12 @@
         const key = el.getAttribute('data-i18n');
         if (data[key]) {
           el.innerText = data[key];
+        }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (data[key]) {
+          el.setAttribute('placeholder', data[key]);
         }
       });
       const btnTr = document.getElementById('lang-btn-tr');

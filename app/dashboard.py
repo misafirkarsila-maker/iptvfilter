@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from . import config, crypto_util, settings_manager
+from .category_grouper import build_category_groups, detect_category_group
 from .database import get_db
 from .models import Category, Provider, Stream
 from .scheduler import run_sync_all
@@ -20,6 +21,8 @@ from typing import Optional
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(config.BASE_DIR / "app" / "templates"))
+templates.env.globals["build_category_groups"] = build_category_groups
+templates.env.globals["detect_category_group"] = detect_category_group
 
 def _panel_token() -> str:
     pwd = settings_manager.get_panel_password()
@@ -348,7 +351,29 @@ async def provider_detail(request: Request, provider_id: int, db: Session = Depe
         return RedirectResponse("/", status_code=303)
     cats = _sort_cats(db, provider_id)
     streams = db.query(Stream).filter(Stream.provider_id == provider_id).count()
-    return templates.TemplateResponse(request, "provider.html", {"provider": provider, "categories": cats, "streams": streams, "req": request})
+
+    seen_groups = {}
+    for c in cats:
+        grp = c.parent_name or detect_category_group(c.name)
+        seen_groups[grp] = seen_groups.get(grp, 0) + 1
+
+    def grp_pill_sort(item):
+        name, cnt = item
+        if "TR /" in name or "TÜRKİYE" in name: return (0, -cnt)
+        if "DE /" in name or "DEUTSCHLAND" in name: return (1, -cnt)
+        if "FR /" in name or "FRANCE" in name: return (2, -cnt)
+        if "UK /" in name or "USA /" in name: return (3, -cnt)
+        if "NL /" in name or "IT /" in name or "ES /" in name: return (4, -cnt)
+        if "ADULT" in name: return (99, -cnt)
+        if "DİĞER" in name: return (98, -cnt)
+        return (10, -cnt)
+
+    top_groups = sorted(seen_groups.items(), key=grp_pill_sort)
+
+    return templates.TemplateResponse(
+        request, "provider.html",
+        {"provider": provider, "categories": cats, "streams": streams, "top_groups": top_groups, "req": request}
+    )
 
 @router.post("/categories/{category_id}/toggle")
 async def toggle_category(category_id: int, db: Session = Depends(get_db)):
@@ -360,6 +385,46 @@ async def toggle_category(category_id: int, db: Session = Depends(get_db)):
         db.query(Stream).filter(Stream.category_id == cat.id).update({"enabled": cat.enabled})
         db.commit()
     return RedirectResponse(f"/providers/{cat.provider_id}" if cat else "/", status_code=303)
+
+@router.post("/categories/group/bulk")
+async def bulk_toggle_group_categories(
+    request: Request,
+    provider_id: int = Form(...),
+    content_type: str = Form(...),
+    group_name: str = Form(...),
+    action: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    if content_type not in ("live", "vod", "series"):
+        raise HTTPException(400, "Invalid content_type")
+    enable = (action == "enable")
+
+    all_type_cats = db.query(Category).filter(
+        Category.provider_id == provider_id,
+        Category.content_type == content_type,
+        Category.is_active == True
+    ).all()
+
+    target_cat_ids = [
+        c.id for c in all_type_cats
+        if (c.parent_name or detect_category_group(c.name)) == group_name
+    ]
+
+    if target_cat_ids:
+        db.query(Category).filter(Category.id.in_(target_cat_ids)).update(
+            {"enabled": enable, "is_new": False}, synchronize_session=False
+        )
+        db.query(Stream).filter(Stream.category_id.in_(target_cat_ids)).update(
+            {"enabled": enable}, synchronize_session=False
+        )
+        db.commit()
+
+    provider = db.query(Provider).get(provider_id)
+    cats = [c for c in _sort_cats(db, provider_id) if c.content_type == content_type]
+    return templates.TemplateResponse(
+        request, "partials/category_section.html",
+        {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
+    )
 
 @router.post("/categories/{content_type}/bulk")
 async def bulk_toggle_categories(
@@ -388,6 +453,36 @@ async def bulk_toggle_categories(
         request, "partials/category_section.html",
         {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
     )
+
+@router.post("/providers/{provider_id}/group/bulk")
+async def bulk_toggle_provider_group(
+    request: Request,
+    provider_id: int,
+    group_name: str = Form(...),
+    action: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    enable = (action == "enable")
+    all_cats = db.query(Category).filter(
+        Category.provider_id == provider_id,
+        Category.is_active == True
+    ).all()
+
+    target_cat_ids = [
+        c.id for c in all_cats
+        if (c.parent_name or detect_category_group(c.name)) == group_name
+    ]
+
+    if target_cat_ids:
+        db.query(Category).filter(Category.id.in_(target_cat_ids)).update(
+            {"enabled": enable, "is_new": False}, synchronize_session=False
+        )
+        db.query(Stream).filter(Stream.category_id.in_(target_cat_ids)).update(
+            {"enabled": enable}, synchronize_session=False
+        )
+        db.commit()
+
+    return RedirectResponse(f"/providers/{provider_id}", status_code=303)
 
 @router.post("/categories/{category_id}/sort")
 async def sort_category(

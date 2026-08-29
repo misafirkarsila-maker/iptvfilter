@@ -76,9 +76,11 @@ def sync_provider(db: Session, provider: Provider) -> dict:
     return stats
 
 def sync_categories(db: Session, provider: Provider, ctype: str, cats: list[dict], now: datetime):
+    from .category_grouper import detect_category_group
     for idx, raw in enumerate(cats or []):
         cid = str(raw.get("category_id", ""))
         name = str(raw.get("category_name", cid)).strip()
+        parent_grp = detect_category_group(name)
         
         existing = db.query(Category).filter(
             Category.provider_id == provider.id,
@@ -88,6 +90,7 @@ def sync_categories(db: Session, provider: Provider, ctype: str, cats: list[dict
 
         if existing:
             existing.name = name
+            existing.parent_name = parent_grp
             existing.is_active = True
             existing.last_seen_at = now
             existing.sort_order = idx
@@ -95,6 +98,7 @@ def sync_categories(db: Session, provider: Provider, ctype: str, cats: list[dict
             db.add(Category(
                 provider_id=provider.id, content_type=ctype,
                 provider_category_id=cid, name=name,
+                parent_name=parent_grp,
                 enabled=True, is_new=True, is_active=True,
                 last_seen_at=now, sort_order=idx
             ))

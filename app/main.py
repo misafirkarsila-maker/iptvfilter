@@ -26,6 +26,13 @@ async def lifespan(app: FastAPI):
     settings_manager.init_security_settings()
     crypto_util.init_encryption_key()
     config.reload_security_config()
+    try:
+        from .database import SessionLocal
+        from .category_grouper import backfill_category_parents
+        with SessionLocal() as db:
+            backfill_category_parents(db)
+    except Exception as exc:
+        logging.warning("Kategori üst başlık güncelleme hatası: %s", exc)
     start_scheduler()
     logging.info("Xtream Filter başlatıldı. API Kullanıcı: %s", config.API_USERNAME)
     yield

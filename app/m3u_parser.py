@@ -174,12 +174,15 @@ def sync_m3u_provider(db: Session, provider: Provider) -> dict:
             category = cat_cache.get(cat_key)
             if not category:
                 # Kategori oluştur
+                from .category_grouper import detect_category_group
+                parent_grp = detect_category_group(group_name)
                 cat_id_slug = f"cat_{len(cat_cache) + 1}"
                 category = Category(
                     provider_id=provider.id,
                     content_type=ctype,
                     provider_category_id=cat_id_slug,
                     name=group_name,
+                    parent_name=parent_grp,
                     enabled=True,  # M3U sağlayıcı eklendiğinde varsayılan aktif gelsin
                     is_new=True,
                     is_active=True,
@@ -192,6 +195,9 @@ def sync_m3u_provider(db: Session, provider: Provider) -> dict:
             else:
                 category.is_active = True
                 category.last_seen_at = now
+                if not category.parent_name:
+                    from .category_grouper import detect_category_group
+                    category.parent_name = detect_category_group(group_name)
 
             sid = f"m3u_{idx}"
             existing = existing_streams.get(sid)
