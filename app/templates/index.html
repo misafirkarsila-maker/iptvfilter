@@ -475,6 +475,33 @@
       cursor: pointer;
     }
 
+    /* Language Switcher */
+    .lang-switcher {
+      display: inline-flex;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--mut);
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover {
+      color: var(--txt);
+    }
+    .lang-btn.active {
+      background: rgba(79, 140, 255, 0.2);
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
     /* Mobil Uyumluluk (Mobile Responsive) */
     @media (max-width: 680px) {
       .wrap { padding: 14px 12px 40px; }
@@ -498,30 +525,36 @@
     <div class="topbar">
       <div class="brand-area">
         <span class="brand-logo">📡</span>
-        <h1>Xtream Filter</h1>
+        <h1 data-i18n="brand_title">Xtream Filter</h1>
       </div>
 
       <div class="topbar-actions">
+        <!-- Dil Seçici -->
+        <div class="lang-switcher">
+          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')">🇹🇷 TR</button>
+          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+        </div>
+
         <!-- Panel Şifre Durumu Rozeti & Ayar Butonu -->
         {% if has_panel_password %}
         <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları">
-          <span>🔒 Panel Korumalı</span>
+          <span data-i18n="panel_protected">🔒 Panel Korumalı</span>
         </button>
         {% else %}
         <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);">
-          <span>🔓 Şifresiz Panel</span>
+          <span data-i18n="panel_unprotected">🔓 Şifresiz Panel</span>
         </button>
         {% endif %}
 
         <form action="/sync" method="post" style="display:inline;" hx-post="/sync" hx-target="#stats" hx-swap="innerHTML">
           <button class="btn sm" type="submit">
-            <span>⚡ Şimdi Güncelle</span>
+            <span data-i18n="sync_now">⚡ Şimdi Güncelle</span>
           </button>
         </form>
 
         {% if has_panel_password %}
         <form action="/logout" method="post" style="display:inline;">
-          <button class="btn ghost sm" type="submit">Çıkış</button>
+          <button class="btn ghost sm" type="submit" data-i18n="logout">Çıkış</button>
         </form>
         {% endif %}
       </div>
@@ -535,47 +568,47 @@
       <div class="api-card-header">
         <div class="api-card-title">
           <span>📺</span>
-          <span>Xtream API Bağlantı Bilgileri</span>
+          <span data-i18n="api_card_title">Xtream API Bağlantı Bilgileri</span>
         </div>
         <div style="display:flex; gap:8px;">
           <form action="/settings/regenerate-api-password" method="post" onsubmit="return confirm('API şifresini yenilemek istediğinize emin misiniz? IPTV uygulamalarınızdaki şifreyi de güncellemeniz gerekecektir.');">
             <button class="copy-pill" type="submit" title="Yeni bir rastgele API şifresi oluşturur">
-              <span>🔄 Şifreyi Yenile</span>
+              <span data-i18n="regen_api_pass">🔄 Şifreyi Yenile</span>
             </button>
           </form>
         </div>
       </div>
 
-      <p style="font-size:0.82rem; color:var(--mut); margin-bottom:14px;">
+      <p style="font-size:0.82rem; color:var(--mut); margin-bottom:14px;" data-i18n="api_card_desc">
         IPTV uygulamanızda (TiviMate, IPTV Smarters, vb.) "Xtream Codes API" ile giriş yaparken aşağıdaki bilgileri kullanın:
       </p>
 
       <div class="api-grid">
         <div class="api-field">
-          <div class="api-field-label">Kullanıcı Adı (Username)</div>
+          <div class="api-field-label" data-i18n="username_label">Kullanıcı Adı (Username)</div>
           <div class="api-field-val">
             <span class="api-code" id="apiUser" style="cursor:pointer;" onclick="copyText('{{ api_user }}', document.getElementById('userCopyBtn'))" title="Tıkla ve Kopyala">{{ api_user }}</span>
-            <button class="copy-pill" id="userCopyBtn" onclick="copyText('{{ api_user }}', this)">Kopyala</button>
+            <button class="copy-pill" id="userCopyBtn" onclick="copyText('{{ api_user }}', this)" data-i18n="copy_btn">Kopyala</button>
           </div>
         </div>
 
         <div class="api-field">
-          <div class="api-field-label">API Şifresi (Password)</div>
+          <div class="api-field-label" data-i18n="password_label">API Şifresi (Password)</div>
           <div class="api-field-val">
             <span class="api-code" id="apiPassMasked" style="cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">••••••••••</span>
             <span class="api-code" id="apiPassReal" style="display:none; cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">{{ api_password }}</span>
             <div style="display:flex; gap:4px;">
               <button class="copy-pill" onclick="toggleApiPass()" id="togglePassBtn" title="Göster/Gizle">👁️</button>
-              <button class="copy-pill" id="passCopyBtn" onclick="copyText('{{ api_password }}', this)">Kopyala</button>
+              <button class="copy-pill" id="passCopyBtn" onclick="copyText('{{ api_password }}', this)" data-i18n="copy_btn">Kopyala</button>
             </div>
           </div>
         </div>
 
         <div class="api-field">
-          <div class="api-field-label">Sunucu Adresi (Server URL)</div>
+          <div class="api-field-label" data-i18n="server_url_label">Sunucu Adresi (Server URL)</div>
           <div class="api-field-val">
             <span class="api-code" id="srvUrl" style="cursor:pointer;" onclick="copyText('http://{{ server_host }}', document.getElementById('srvCopyBtn'))" title="Tıkla ve Kopyala">http://{{ server_host }}</span>
-            <button class="copy-pill" id="srvCopyBtn" onclick="copyText('http://{{ server_host }}', this)">Kopyala</button>
+            <button class="copy-pill" id="srvCopyBtn" onclick="copyText('http://{{ server_host }}', this)" data-i18n="copy_btn">Kopyala</button>
           </div>
         </div>
       </div>
@@ -585,12 +618,12 @@
         <div class="quick-link-item">
           <span class="quick-link-label">M3U Playlist:</span>
           <span class="quick-link-url" id="m3uUrl">http://{{ server_host }}/playlist.m3u?username={{ api_user }}&password={{ api_password }}</span>
-          <button class="copy-pill" onclick="copyText(document.getElementById('m3uUrl').innerText, this)">M3U Kopyala</button>
+          <button class="copy-pill" onclick="copyText(document.getElementById('m3uUrl').innerText, this)" data-i18n="copy_m3u">M3U Kopyala</button>
         </div>
         <div class="quick-link-item">
           <span class="quick-link-label">XMLTV EPG:</span>
           <span class="quick-link-url" id="epgUrl">http://{{ server_host }}/xmltv.php?username={{ api_user }}&password={{ api_password }}</span>
-          <button class="copy-pill" onclick="copyText(document.getElementById('epgUrl').innerText, this)">EPG Kopyala</button>
+          <button class="copy-pill" onclick="copyText(document.getElementById('epgUrl').innerText, this)" data-i18n="copy_epg">EPG Kopyala</button>
         </div>
       </div>
     </div>
@@ -598,14 +631,14 @@
     <!-- Sağlayıcılar Listesi & Öncelik Sırası -->
     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
       <div>
-        <h2 style="margin:0 0 4px;">IPTV Sağlayıcıları & Öncelik Sırası</h2>
-        <p style="font-size:0.82rem; color:var(--mut); margin:0;">
+        <h2 style="margin:0 0 4px;" data-i18n="providers_title">IPTV Sağlayıcıları & Öncelik Sırası</h2>
+        <p style="font-size:0.82rem; color:var(--mut); margin:0;" data-i18n="providers_desc">
           Aktif sağlayıcılar öncelik sırasına göre tek listede birleştirilir. Üstteki sağlayıcının kanalları önceliklidir; aynı kanal alttakilerde varsa duplicate engellenir.
         </p>
       </div>
       <div>
         <span class="badge ok" style="padding:5px 12px; font-size:0.8rem;">
-          <span>⚡ {{ active_count }} Sağlayıcı Aktif & Birleştiriliyor</span>
+          <span>⚡ {{ active_count }} <span data-i18n="providers_badge_suffix">Sağlayıcı Aktif & Birleştiriliyor</span></span>
         </span>
       </div>
     </div>
@@ -651,21 +684,21 @@
 
         <div class="host">{{ p.display_host }}</div>
         <div class="small mut">
-          Son senkronizasyon:
+          <span data-i18n="last_sync">Son senkronizasyon:</span>
           {{ p.last_sync_at.strftime('%d.%m.%Y %H:%M') if p.last_sync_at else '—' }}
         </div>
         <div class="row" style="margin-top:14px;">
-          <a class="btn sm" href="/providers/{{ p.id }}">Kategorileri Yönet</a>
+          <a class="btn sm" href="/providers/{{ p.id }}" data-i18n="manage_cats">Kategorileri Yönet</a>
           {% if p.last_sync_status=='error' and p.last_sync_error %}
           <span class="small mut" title="{{ p.last_sync_error }}">⛔</span>
           {% endif %}
           <form action="/providers/{{ p.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Bu sağlayıcıyı silmek istediğinize emin misiniz?');">
-            <button class="btn danger sm" type="submit">Sil</button>
+            <button class="btn danger sm" type="submit" data-i18n="delete">Sil</button>
           </form>
         </div>
       </div>
       {% else %}
-      <div class="card mut" style="grid-column: 1 / -1; text-align: center; padding: 32px;">
+      <div class="card mut" style="grid-column: 1 / -1; text-align: center; padding: 32px;" data-i18n="no_providers">
         Henüz IPTV sağlayıcısı eklenmemiş. Aşağıdaki formdan ilk sağlayıcınızı ekleyin.
       </div>
       {% endfor %}
@@ -673,46 +706,46 @@
 
     <!-- Sağlayıcı Ekle Formu -->
     <details class="accordion">
-      <summary>+ Yeni IPTV Sağlayıcı Ekle</summary>
+      <summary data-i18n="add_provider_summary">+ Yeni IPTV Sağlayıcı Ekle</summary>
       <div class="accordion-content">
         <form action="/providers" method="post">
           <div style="background: rgba(79, 140, 255, 0.08); border: 1px dashed rgba(79, 140, 255, 0.4); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
             <label style="color:#93c5fd; font-weight:600; display:flex; align-items:center; gap:6px;">
-              <span>⚡ Hızlı Kurulum: M3U Linki Yapıştır</span>
+              <span data-i18n="m3u_quick_title">⚡ Hızlı Kurulum: M3U Linki Yapıştır</span>
             </label>
             <input type="text" id="m3uInput" name="m3u_url" placeholder="http://domain.com:8080/get.php?username=...&password=... veya https://site.com/liste.m3u" oninput="autoParseM3uUrl(this.value)">
-            <p class="mut small" style="margin:6px 0 0 0;">
+            <p class="mut small" style="margin:6px 0 0 0;" data-i18n="m3u_quick_desc">
               M3U linkini yapıştırdığınızda sistem önce Xtream API bağlantısını dener; bulamazsa doğrudan M3U çalma listesi olarak güvenle senkronize eder.
             </p>
           </div>
 
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
             <hr style="flex:1; border:0; border-top:1px solid var(--card-border);">
-            <span class="mut small">veya manuel Xtream bilgileri girin</span>
+            <span class="mut small" data-i18n="or_manual">veya manuel Xtream bilgileri girin</span>
             <hr style="flex:1; border:0; border-top:1px solid var(--card-border);">
           </div>
 
           <div style="margin-bottom:12px;">
-            <label>Sağlayıcı Adı (İsteğe Bağlı)</label>
+            <label data-i18n="prov_name_label">Sağlayıcı Adı (İsteğe Bağlı)</label>
             <input type="text" id="provNameInput" name="name" placeholder="Ör: Ana IPTV">
           </div>
           
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
             <div>
-              <label>Sunucu URL</label>
+              <label data-i18n="server_url_label_input">Sunucu URL</label>
               <input type="text" id="srvUrlInput" name="server_url" placeholder="http://example.com:8080">
             </div>
             <div>
-              <label>Kullanıcı Adı</label>
+              <label data-i18n="username_label_input">Kullanıcı Adı</label>
               <input type="text" id="usernameInput" name="username" placeholder="xtream username">
             </div>
             <div>
-              <label>Şifre</label>
+              <label data-i18n="password_label_input">Şifre</label>
               <input type="password" id="passwordInput" name="password" placeholder="xtream password">
             </div>
           </div>
           <div style="margin-top:16px;">
-            <button class="btn" type="submit">Sağlayıcıyı Kaydet</button>
+            <button class="btn" type="submit" data-i18n="save_provider_btn">Sağlayıcıyı Kaydet</button>
           </div>
         </form>
       </div>
@@ -883,6 +916,104 @@
     } else if (err === 'pass_mismatch') {
       toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Girdiğiniz şifreler eşleşmedi veya çok kısa.</span></div>';
     }
+
+    // ================= DİL DESTEĞİ (i18n) =================
+    const i18nData = {
+      tr: {
+        "brand_title": "Xtream Filter",
+        "sync_now": "⚡ Şimdi Güncelle",
+        "panel_protected": "🔒 Panel Korumalı",
+        "panel_unprotected": "🔓 Şifresiz Panel",
+        "logout": "Çıkış",
+        "api_card_title": "Xtream API Bağlantı Bilgileri",
+        "regen_api_pass": "🔄 Şifreyi Yenile",
+        "api_card_desc": 'IPTV uygulamanızda (TiviMate, IPTV Smarters, vb.) "Xtream Codes API" ile giriş yaparken aşağıdaki bilgileri kullanın:',
+        "username_label": "Kullanıcı Adı (Username)",
+        "password_label": "API Şifresi (Password)",
+        "server_url_label": "Sunucu Adresi (Server URL)",
+        "copy_btn": "Kopyala",
+        "copy_m3u": "M3U Kopyala",
+        "copy_epg": "EPG Kopyala",
+        "providers_title": "IPTV Sağlayıcıları & Öncelik Sırası",
+        "providers_desc": "Aktif sağlayıcılar öncelik sırasına göre tek listede birleştirilir. Üstteki sağlayıcının kanalları önceliklidir; aynı kanal alttakilerde varsa duplicate engellenir.",
+        "providers_badge_suffix": "Sağlayıcı Aktif & Birleştiriliyor",
+        "manage_cats": "Kategorileri Yönet",
+        "delete": "Sil",
+        "last_sync": "Son senkronizasyon:",
+        "no_providers": "Henüz IPTV sağlayıcısı eklenmemiş. Aşağıdaki formdan ilk sağlayıcınızı ekleyin.",
+        "add_provider_summary": "+ Yeni IPTV Sağlayıcı Ekle",
+        "m3u_quick_title": "⚡ Hızlı Kurulum: M3U Linki Yapıştır",
+        "m3u_quick_desc": "M3U linkini yapıştırdığınızda sistem önce Xtream API bağlantısını dener; bulamazsa doğrudan M3U çalma listesi olarak güvenle senkronize eder.",
+        "or_manual": "veya manuel Xtream bilgileri girin",
+        "prov_name_label": "Sağlayıcı Adı (İsteğe Bağlı)",
+        "server_url_label_input": "Sunucu URL",
+        "username_label_input": "Kullanıcı Adı",
+        "password_label_input": "Şifre",
+        "save_provider_btn": "Sağlayıcıyı Kaydet"
+      },
+      en: {
+        "brand_title": "Xtream Filter",
+        "sync_now": "⚡ Sync Now",
+        "panel_protected": "🔒 Protected Panel",
+        "panel_unprotected": "🔓 Open Panel",
+        "logout": "Logout",
+        "api_card_title": "Xtream API & Connection Credentials",
+        "regen_api_pass": "🔄 Regenerate Password",
+        "api_card_desc": 'Use these credentials in your IPTV player (TiviMate, IPTV Smarters, etc.) under "Xtream Codes API" login:',
+        "username_label": "Username",
+        "password_label": "API Password",
+        "server_url_label": "Server URL",
+        "copy_btn": "Copy",
+        "copy_m3u": "Copy M3U",
+        "copy_epg": "Copy EPG",
+        "providers_title": "IPTV Providers & Priority Order",
+        "providers_desc": "Active providers are aggregated by priority order. Higher providers take precedence; duplicate streams are filtered automatically.",
+        "providers_badge_suffix": "Providers Active & Aggregated",
+        "manage_cats": "Manage Categories",
+        "delete": "Delete",
+        "last_sync": "Last sync:",
+        "no_providers": "No IPTV providers added yet. Add your first provider using the form below.",
+        "add_provider_summary": "+ Add New IPTV Provider",
+        "m3u_quick_title": "⚡ Quick Setup: Paste M3U URL",
+        "m3u_quick_desc": "Paste your M3U link and the system will attempt an Xtream API handshake first, safely falling back to direct M3U playlist streaming.",
+        "or_manual": "or enter manual Xtream credentials",
+        "prov_name_label": "Provider Name (Optional)",
+        "server_url_label_input": "Server URL",
+        "username_label_input": "Username",
+        "password_label_input": "Password",
+        "save_provider_btn": "Save Provider"
+      }
+    };
+
+    function setLanguage(lang) {
+      localStorage.setItem('iptvfilter_lang', lang);
+      applyLanguage(lang);
+    }
+
+    function applyLanguage(lang) {
+      const data = i18nData[lang] || i18nData.tr;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (data[key]) {
+          el.innerText = data[key];
+        }
+      });
+      const btnTr = document.getElementById('lang-btn-tr');
+      const btnEn = document.getElementById('lang-btn-en');
+      if (btnTr && btnEn) {
+        if (lang === 'en') {
+          btnEn.classList.add('active');
+          btnTr.classList.remove('active');
+        } else {
+          btnTr.classList.add('active');
+          btnEn.classList.remove('active');
+        }
+      }
+    }
+
+    // Sayfa açıldığında kayıtlı dili uygula
+    const currentLang = localStorage.getItem('iptvfilter_lang') || 'tr';
+    applyLanguage(currentLang);
   </script>
 </body>
 </html>

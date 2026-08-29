@@ -31,6 +31,31 @@
     .cat-item input { width:auto; transform:scale(1.2); }
     label.check { display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; }
 
+    /* Language Switcher */
+    .lang-switcher {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: var(--mut);
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover { color: var(--txt); }
+    .lang-btn.active {
+      background: rgba(79, 140, 255, 0.2);
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
     /* Mobil Uyumluluk (Mobile Responsive) */
     @media (max-width: 640px) {
       .wrap { padding: 12px 10px 40px; }
@@ -45,13 +70,20 @@
   <div class="wrap">
     <div class="row" style="justify-content:space-between; margin-bottom:8px;">
       <h1>{{ provider.name }}</h1>
-      <a class="btn ghost sm" href="/">← Geri</a>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="lang-switcher">
+          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')">🇹🇷 TR</button>
+          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+        </div>
+        <a class="btn ghost sm" href="/" data-i18n="back_btn">← Geri</a>
+      </div>
     </div>
     <div class="card small mut">
-      Sunucu: <code>{{ provider.server_url }}</code> · Kullanıcı: <code>{{ provider.username }}</code> ·
-      Toplam içerik: <strong>{{ streams }}</strong>
-      <br>Son senkronizasyon: {{ provider.last_sync_at.strftime('%d.%m.%Y %H:%M') if provider.last_sync_at else '—' }} ·
-      Durum:
+      <span data-i18n="server_lbl">Sunucu:</span> <code>{{ provider.server_url }}</code> · 
+      <span data-i18n="user_lbl">Kullanıcı:</span> <code>{{ provider.username }}</code> ·
+      <span data-i18n="total_content_lbl">Toplam içerik:</span> <strong>{{ streams }}</strong>
+      <br><span data-i18n="last_sync_lbl">Son senkronizasyon:</span> {{ provider.last_sync_at.strftime('%d.%m.%Y %H:%M') if provider.last_sync_at else '—' }} ·
+      <span data-i18n="status_lbl">Durum:</span>
       <span class="badge {% if provider.last_sync_status=='ok' %}ok{% elif provider.last_sync_status=='error' %}err{% else %}mut{% endif %}">
         {% if provider.last_sync_status=='ok' %}✓ Bağlı{% elif provider.last_sync_status=='error' %}⛔ Hata{% else %}Yeni{% endif %}
       </span>
@@ -98,6 +130,55 @@
         el.style.display = name.includes(val) ? 'flex' : 'none';
       });
     }
+
+    // ================= DİL DESTEĞİ (i18n) =================
+    const providerI18n = {
+      tr: {
+        "back_btn": "← Geri",
+        "server_lbl": "Sunucu:",
+        "user_lbl": "Kullanıcı:",
+        "total_content_lbl": "Toplam içerik:",
+        "last_sync_lbl": "Son senkronizasyon:",
+        "status_lbl": "Durum:"
+      },
+      en: {
+        "back_btn": "← Back",
+        "server_lbl": "Server:",
+        "user_lbl": "User:",
+        "total_content_lbl": "Total streams:",
+        "last_sync_lbl": "Last sync:",
+        "status_lbl": "Status:"
+      }
+    };
+
+    function setLanguage(lang) {
+      localStorage.setItem('iptvfilter_lang', lang);
+      applyLanguage(lang);
+    }
+
+    function applyLanguage(lang) {
+      const data = providerI18n[lang] || providerI18n.tr;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (data[key]) {
+          el.innerText = data[key];
+        }
+      });
+      const btnTr = document.getElementById('lang-btn-tr');
+      const btnEn = document.getElementById('lang-btn-en');
+      if (btnTr && btnEn) {
+        if (lang === 'en') {
+          btnEn.classList.add('active');
+          btnTr.classList.remove('active');
+        } else {
+          btnTr.classList.add('active');
+          btnEn.classList.remove('active');
+        }
+      }
+    }
+
+    const currentLang = localStorage.getItem('iptvfilter_lang') || 'tr';
+    applyLanguage(currentLang);
   </script>
 </body>
 </html>
