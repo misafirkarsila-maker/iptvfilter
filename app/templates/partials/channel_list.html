@@ -1,29 +1,37 @@
 <!-- Kategori İçindeki Kanalları Yönetme Çekmecesi (Live TV) -->
-<div class="channel-drawer" id="channel-drawer-{{ category.id }}" style="margin: 8px 0 14px 0; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(79, 140, 255, 0.35); border-radius: 8px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+<div class="channel-drawer" id="channel-drawer-{{ category.id }}" style="margin: 8px 0 14px 0; padding: 12px; background: rgba(15, 23, 42, 0.65); border: 1px dashed rgba(79, 140, 255, 0.35); border-radius: 8px;">
+  <style>
+    @media (max-width: 640px) {
+      .channel-controls-bar { width: 100%; margin-top: 6px; }
+      .channel-controls-bar input { flex: 1 !important; min-width: 90px !important; }
+      .channel-grid-responsive { grid-template-columns: 1fr !important; max-height: 260px !important; }
+    }
+  </style>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
     <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-weight: 600; font-size: 0.9rem; color: #93c5fd;">📺 {{ category.name }} — Kanallar ({{ streams|length }})</span>
+      <span style="font-weight: 600; font-size: 0.88rem; color: #93c5fd;">📺 {{ category.name }} — Kanallar ({{ streams|length }})</span>
     </div>
     
-    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+    <div class="channel-controls-bar" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
       <input type="text" placeholder="Kanal ara..." oninput="filterChannelsInDrawer(this, '{{ category.id }}')"
-             style="padding: 4px 10px; font-size: 0.78rem; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--txt); width: 140px;">
+             style="padding: 4px 8px; font-size: 0.78rem; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--txt); width: 120px;">
       
       <button class="btn xs" type="button"
               hx-post="/categories/{{ category.id }}/streams/bulk"
               hx-vals='{"action":"enable"}'
-              hx-target="#channel-drawer-{{ category.id }}" hx-swap="outerHTML">Tümünü Seç</button>
+              hx-target="#channel-drawer-{{ category.id }}" hx-swap="outerHTML">Tümü Seç</button>
       
       <button class="btn xs ghost" type="button"
               hx-post="/categories/{{ category.id }}/streams/bulk"
               hx-vals='{"action":"disable"}'
-              hx-target="#channel-drawer-{{ category.id }}" hx-swap="outerHTML">Tümünü Kaldır</button>
+              hx-target="#channel-drawer-{{ category.id }}" hx-swap="outerHTML">Tümü Kaldır</button>
       
       <button class="btn xs ghost" type="button" onclick="document.getElementById('channel-drawer-{{ category.id }}').remove()" title="Kapat" style="padding: 3px 8px; font-weight: bold;">✕</button>
     </div>
   </div>
 
-  <div class="channel-grid" id="channel-grid-{{ category.id }}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px; max-height: 320px; overflow-y: auto; padding-right: 6px;">
+  <div class="channel-grid channel-grid-responsive" id="channel-grid-{{ category.id }}" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; max-height: 320px; overflow-y: auto; padding-right: 6px;">
     {% for s in streams %}
     <div class="channel-item" data-name="{{ s.name|lower }}" style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 6px; font-size: 0.8rem; transition: background 0.15s;">
       <input type="checkbox" id="stream-cb-{{ s.id }}" {% if s.enabled %}checked{% endif %}
