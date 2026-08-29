@@ -5,11 +5,12 @@
 
 services:
   xtream-filter:
+    build: .
     image: ghcr.io/misafirkarsila-maker/xtream-playlist-manager:latest
     container_name: xtream-filter
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${HOST_PORT:-8080}:8000"
     environment:
       # ---- Uygulama ----
       - APP_HOST=0.0.0.0
