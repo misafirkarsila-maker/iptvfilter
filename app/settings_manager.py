@@ -30,10 +30,11 @@ ENV_EXAMPLE_FILE = BASE_DIR / ".env.example"
 _CACHE: Dict[str, Any] = {}
 
 
-def generate_secure_password(length: int = 10) -> str:
-    """Okunması ve yazılması kolay, karışıklığa yol açmayan karakterlerle rastgele şifre üretir."""
-    alphabet = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+def generate_secure_password(length: int = 6) -> str:
+    """TV kumandasıyla kolayca girilebilmesi için sadece rakamlardan oluşan sayısal PIN şifre üretir."""
+    first_digit = secrets.choice("123456789")
+    remaining_digits = "".join(secrets.choice("0123456789") for _ in range(length - 1))
+    return first_digit + remaining_digits
 
 
 def update_env_file(updates: Dict[str, str]) -> None:
@@ -238,9 +239,20 @@ def set_panel_password(panel_password: Optional[str]) -> None:
         update_env_file({"PANEL_PASSWORD": cleaned_pass or ""})
 
 
-def regenerate_api_password() -> str:
-    """Yeni bir API şifresi üretir ve kaydeder."""
-    new_pass = generate_secure_password(10)
+def set_api_password(new_password: str) -> str:
+    """API şifresini günceller ve kaydeder."""
+    clean_pass = str(new_password).strip()
+    settings = load_settings()
+    settings["api_password"] = clean_pass
+    save_settings(settings)
+    if ENV_FILE.exists():
+        update_env_file({"API_PASSWORD": clean_pass})
+    return clean_pass
+
+
+def regenerate_api_password(length: int = 6) -> str:
+    """Yeni bir sayısal API şifresi (PIN) üretir ve kaydeder."""
+    new_pass = generate_secure_password(length)
     settings = load_settings()
     settings["api_password"] = new_pass
     save_settings(settings)
