@@ -377,7 +377,13 @@ async def provider_detail(request: Request, provider_id: int, db: Session = Depe
 
     return templates.TemplateResponse(
         request, "provider.html",
-        {"provider": provider, "categories": cats, "streams": streams, "req": request}
+        {
+            "provider": provider,
+            "categories": cats,
+            "streams": streams,
+            "stream_proxy_enabled": settings_manager.is_stream_proxy_enabled(),
+            "req": request,
+        }
     )
 
 @router.post("/categories/{category_id}/toggle")
