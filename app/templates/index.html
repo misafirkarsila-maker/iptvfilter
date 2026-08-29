@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xtream Filter — IPTV Liste Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    :root {
+      --bg: #0b0d13;
+      --card: #141822;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --line: #222836;
+      --txt: #f0f3f8;
+      --mut: #8b95a8;
+      --acc: #4f8cff;
+      --acc-glow: rgba(79, 140, 255, 0.35);
+      --ok: #10b981;
+      --err: #ef4444;
+      --new: #f59e0b;
+      --radius-lg: 14px;
+      --radius-md: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(79, 140, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+      color: var(--txt);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* Topbar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      font-size: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      margin: 0 0 12px;
+      color: var(--mut);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .prov {
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .prov:hover {
+      transform: translateY(-2px);
+      border-color: rgba(79, 140, 255, 0.3);
+    }
+
+    .prov h3 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .prov .host {
+      color: var(--mut);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge.ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .badge.err { background: rgba(239, 68, 68, 0.15); color: var(--err); border: 1px solid rgba(239, 68, 68, 0.25); }
+    .badge.new { background: rgba(245, 158, 11, 0.15); color: var(--new); border: 1px solid rgba(245, 158, 11, 0.25); }
+    .badge.mut { background: rgba(139, 149, 168, 0.15); color: var(--mut); border: 1px solid rgba(139, 149, 168, 0.25); }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--acc);
+      color: #fff;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn.ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--txt);
+    }
+
+    .btn.ghost:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.85);
+    }
+
+    .btn.sm {
+      padding: 5px 11px;
+      font-size: 0.8rem;
+    }
+
+    .btn.xs {
+      padding: 3px 8px;
+      font-size: 0.72rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--mut);
+      margin: 10px 0 4px;
+    }
+
+    input[type=text], input[type=password] {
+      width: 100%;
+      background: rgba(9, 11, 17, 0.9);
+      border: 1px solid var(--card-border);
+      color: var(--txt);
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    input[type=text]:focus, input[type=password]:focus {
+      outline: none;
+      border-color: var(--acc);
+      box-shadow: 0 0 0 3px var(--acc-glow);
+    }
+
+    .mut { color: var(--mut); }
+    .small { font-size: 0.8rem; }
+    a { text-decoration: none; }
+
+    /* Accordion */
+    .accordion {
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: var(--card);
+    }
+
+    .accordion summary {
+      cursor: pointer;
+      padding: 14px 18px;
+      font-weight: 600;
+      color: var(--txt);
+      background: var(--card);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion summary::-webkit-details-marker { display: none; }
+    .accordion summary::after {
+      content: "▸";
+      transition: transform 0.2s;
+      color: var(--mut);
+      font-size: 0.85rem;
+    }
+
+    .accordion[open] summary::after { transform: rotate(90deg); }
+    .accordion[open] { border-color: rgba(79, 140, 255, 0.35); }
+    .accordion-content {
+      padding: 18px;
+      border-top: 1px solid var(--card-border);
+      animation: slide 0.2s ease;
+    }
+
+    @keyframes slide {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Toast Notification */
+    .toast {
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slide 0.25s ease;
+    }
+
+    .toast.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--ok);
+      color: #a7f3d0;
+    }
+
+    .toast.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--err);
+      color: #fca5a5;
+    }
+
+    /* Xtream API Credentials Card */
+    .api-card {
+      background: linear-gradient(135deg, rgba(20, 24, 35, 0.95) 0%, rgba(15, 19, 28, 0.95) 100%);
+      border: 1px solid rgba(79, 140, 255, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .api-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #4f8cff, #10b981);
+    }
+
+    .api-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .api-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .api-field {
+      background: rgba(8, 10, 15, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+    }
+
+    .api-field-label {
+      font-size: 0.75rem;
+      color: var(--mut);
+      margin-bottom: 4px;
+    }
+
+    .api-field-val {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .api-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92rem;
+      color: #e2e8f0;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--mut);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .copy-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .copy-pill.copied {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--ok);
+      color: var(--ok);
+    }
+
+    .quick-links {
+      background: rgba(8, 10, 15, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .quick-link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .quick-link-label {
+      color: var(--mut);
+      font-weight: 500;
+    }
+
+    .quick-link-url {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      color: #93c5fd;
+      background: rgba(79, 140, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--mut);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand-area">
+        <span class="brand-logo">📡</span>
+        <h1>Xtream Filter</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Panel Şifre Durumu Rozeti & Ayar Butonu -->
+        {% if has_panel_password %}
+        <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları">
+          <span>🔒 Panel Korumalı</span>
+        </button>
+        {% else %}
+        <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);">
+          <span>🔓 Şifresiz Panel</span>
+        </button>
+        {% endif %}
+
+        <form action="/sync" method="post" style="display:inline;" hx-post="/sync" hx-target="#stats" hx-swap="innerHTML">
+          <button class="btn sm" type="submit">
+            <span>⚡ Şimdi Güncelle</span>
+          </button>
+        </form>
+
+        {% if has_panel_password %}
+        <form action="/logout" method="post" style="display:inline;">
+          <button class="btn ghost sm" type="submit">Çıkış</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastArea"></div>
+
+    <!-- Xtream API Bağlantı Kartı -->
+    <div class="api-card">
+      <div class="api-card-header">
+        <div class="api-card-title">
+          <span>📺</span>
+          <span>Xtream API Bağlantı Bilgileri</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <form action="/settings/regenerate-api-password" method="post" onsubmit="return confirm('API şifresini yenilemek istediğinize emin misiniz? IPTV uygulamalarınızdaki şifreyi de güncellemeniz gerekecektir.');">
+            <button class="copy-pill" type="submit" title="Yeni bir rastgele API şifresi oluşturur">
+              <span>🔄 Şifreyi Yenile</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--mut); margin-bottom:14px;">
+        IPTV uygulamanızda (TiviMate, IPTV Smarters, vb.) "Xtream Codes API" ile giriş yaparken aşağıdaki bilgileri kullanın:
+      </p>
+
+      <div class="api-grid">
+        <div class="api-field">
+          <div class="api-field-label">Kullanıcı Adı (Username)</div>
+          <div class="api-field-val">
+            <span class="api-code" id="apiUser" style="cursor:pointer;" onclick="copyText('{{ api_user }}', document.getElementById('userCopyBtn'))" title="Tıkla ve Kopyala">{{ api_user }}</span>
+            <button class="copy-pill" id="userCopyBtn" onclick="copyText('{{ api_user }}', this)">Kopyala</button>
+          </div>
+        </div>
+
+        <div class="api-field">
+          <div class="api-field-label">API Şifresi (Password)</div>
+          <div class="api-field-val">
+            <span class="api-code" id="apiPassMasked" style="cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">••••••••••</span>
+            <span class="api-code" id="apiPassReal" style="display:none; cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">{{ api_password }}</span>
+            <div style="display:flex; gap:4px;">
+              <button class="copy-pill" onclick="toggleApiPass()" id="togglePassBtn" title="Göster/Gizle">👁️</button>
+              <button class="copy-pill" id="passCopyBtn" onclick="copyText('{{ api_password }}', this)">Kopyala</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-field">
+          <div class="api-field-label">Sunucu Adresi (Server URL)</div>
+          <div class="api-field-val">
+            <span class="api-code" id="srvUrl" style="cursor:pointer;" onclick="copyText('http://{{ server_host }}', document.getElementById('srvCopyBtn'))" title="Tıkla ve Kopyala">http://{{ server_host }}</span>
+            <button class="copy-pill" id="srvCopyBtn" onclick="copyText('http://{{ server_host }}', this)">Kopyala</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doğrudan Playlist Linkleri -->
+      <div class="quick-links">
+        <div class="quick-link-item">
+          <span class="quick-link-label">M3U Playlist:</span>
+          <span class="quick-link-url" id="m3uUrl">http://{{ server_host }}/playlist.m3u?username={{ api_user }}&password={{ api_password }}</span>
+          <button class="copy-pill" onclick="copyText(document.getElementById('m3uUrl').innerText, this)">M3U Kopyala</button>
+        </div>
+        <div class="quick-link-item">
+          <span class="quick-link-label">XMLTV EPG:</span>
+          <span class="quick-link-url" id="epgUrl">http://{{ server_host }}/xmltv.php?username={{ api_user }}&password={{ api_password }}</span>
+          <button class="copy-pill" onclick="copyText(document.getElementById('epgUrl').innerText, this)">EPG Kopyala</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sağlayıcılar Listesi & Öncelik Sırası -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h2 style="margin:0 0 4px;">IPTV Sağlayıcıları & Öncelik Sırası</h2>
+        <p style="font-size:0.82rem; color:var(--mut); margin:0;">
+          Aktif sağlayıcılar öncelik sırasına göre tek listede birleştirilir. Üstteki sağlayıcının kanalları önceliklidir; aynı kanal alttakilerde varsa duplicate engellenir.
+        </p>
+      </div>
+      <div>
+        <span class="badge ok" style="padding:5px 12px; font-size:0.8rem;">
+          <span>⚡ {{ active_count }} Sağlayıcı Aktif & Birleştiriliyor</span>
+        </span>
+      </div>
+    </div>
+
+    <div id="stats" class="grid">
+      {% for p in providers %}
+      <div class="card prov" style="{% if not p.enabled %}opacity:0.65; border-style:dashed;{% endif %}">
+        <div class="row" style="justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge" style="background:rgba(79,140,255,0.15); color:var(--acc); font-weight:700; border:1px solid rgba(79,140,255,0.3);">
+              #{{ loop.index }} Öncelik
+            </span>
+            <div style="display:flex; gap:2px;">
+              <form action="/providers/{{ p.id }}/priority" method="post" style="display:inline;">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn ghost xs" type="submit" title="Önceliği Artır (Yukarı Taşı)" {% if loop.first %}disabled style="opacity:0.3; cursor:not-allowed;"{% endif %}>▲</button>
+              </form>
+              <form action="/providers/{{ p.id }}/priority" method="post" style="display:inline;">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn ghost xs" type="submit" title="Önceliği Azalt (Aşağı Taşı)" {% if loop.last %}disabled style="opacity:0.3; cursor:not-allowed;"{% endif %}>▼</button>
+              </form>
+            </div>
+          </div>
+          <span class="badge {% if p.last_sync_status=='ok' %}ok{% elif p.last_sync_status=='error' %}err{% else %}mut{% endif %}">
+            {% if p.last_sync_status=='ok' %}✓ Senkronize{% elif p.last_sync_status=='error' %}⛔ Hata{% else %}Yeni{% endif %}
+          </span>
+        </div>
+
+        <div class="row" style="justify-content:space-between; align-items:baseline;">
+          <h3 style="margin:0 0 4px;">{{ p.name }}</h3>
+          <form action="/providers/{{ p.id }}/toggle" method="post" style="display:inline;">
+            {% if p.enabled %}
+            <button class="btn xs" type="submit" style="background:rgba(16,185,129,0.15); color:var(--ok); border:1px solid rgba(16,185,129,0.3);" title="Yayından kaldırmak için tıkla">
+              ● Yayında (Aktif)
+            </button>
+            {% else %}
+            <button class="btn ghost xs" type="submit" style="color:var(--mut); border-color:rgba(255,255,255,0.1);" title="Yayına dahil etmek için tıkla">
+              ○ Devre Dışı (Pasif)
+            </button>
+            {% endif %}
+          </form>
+        </div>
+
+        <div class="host">{{ p.display_host }}</div>
+        <div class="small mut">
+          Son senkronizasyon:
+          {{ p.last_sync_at.strftime('%d.%m.%Y %H:%M') if p.last_sync_at else '—' }}
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <a class="btn sm" href="/providers/{{ p.id }}">Kategorileri Yönet</a>
+          {% if p.last_sync_status=='error' and p.last_sync_error %}
+          <span class="small mut" title="{{ p.last_sync_error }}">⛔</span>
+          {% endif %}
+          <form action="/providers/{{ p.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Bu sağlayıcıyı silmek istediğinize emin misiniz?');">
+            <button class="btn danger sm" type="submit">Sil</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="card mut" style="grid-column: 1 / -1; text-align: center; padding: 32px;">
+        Henüz IPTV sağlayıcısı eklenmemiş. Aşağıdaki formdan ilk sağlayıcınızı ekleyin.
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Sağlayıcı Ekle Formu -->
+    <details class="accordion">
+      <summary>+ Yeni IPTV Sağlayıcı Ekle</summary>
+      <div class="accordion-content">
+        <form action="/providers" method="post">
+          <div style="background: rgba(79, 140, 255, 0.08); border: 1px dashed rgba(79, 140, 255, 0.4); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
+            <label style="color:#93c5fd; font-weight:600; display:flex; align-items:center; gap:6px;">
+              <span>⚡ Hızlı Kurulum: M3U Linki Yapıştır</span>
+            </label>
+            <input type="text" id="m3uInput" name="m3u_url" placeholder="http://domain.com:8080/get.php?username=...&password=... veya https://site.com/liste.m3u" oninput="autoParseM3uUrl(this.value)">
+            <p class="mut small" style="margin:6px 0 0 0;">
+              M3U linkini yapıştırdığınızda sistem önce Xtream API bağlantısını dener; bulamazsa doğrudan M3U çalma listesi olarak güvenle senkronize eder.
+            </p>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <hr style="flex:1; border:0; border-top:1px solid var(--card-border);">
+            <span class="mut small">veya manuel Xtream bilgileri girin</span>
+            <hr style="flex:1; border:0; border-top:1px solid var(--card-border);">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label>Sağlayıcı Adı (İsteğe Bağlı)</label>
+            <input type="text" id="provNameInput" name="name" placeholder="Ör: Ana IPTV">
+          </div>
+          
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+            <div>
+              <label>Sunucu URL</label>
+              <input type="text" id="srvUrlInput" name="server_url" placeholder="http://example.com:8080">
+            </div>
+            <div>
+              <label>Kullanıcı Adı</label>
+              <input type="text" id="usernameInput" name="username" placeholder="xtream username">
+            </div>
+            <div>
+              <label>Şifre</label>
+              <input type="password" id="passwordInput" name="password" placeholder="xtream password">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn" type="submit">Sağlayıcıyı Kaydet</button>
+          </div>
+        </form>
+      </div>
+    </details>
+  </div>
+
+  <!-- Güvenlik & Panel Şifresi Ayarları Modalı -->
+  <div class="modal-overlay" id="securityModal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🔐 Panel Güvenlik Ayarları</h3>
+        <button class="modal-close" onclick="closeSecurityModal()">✕</button>
+      </div>
+
+      <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;">
+        {% if has_panel_password %}
+        Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.
+        {% else %}
+        Paneliniz şu anda <strong>şifresiz</strong>. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.
+        {% endif %}
+      </p>
+
+      <!-- Şifre Belirle / Değiştir Formu -->
+      <form action="/settings/panel-password" method="post">
+        <input type="hidden" name="action_type" value="set">
+        <div style="margin-bottom:12px;">
+          <label for="new_pass">{% if has_panel_password %}Yeni Panel Şifresi{% else %}Panel Şifresi{% endif %}</label>
+          <input type="password" id="new_pass" name="new_password" required minlength="3" placeholder="En az 3 karakter">
+        </div>
+        <div style="margin-bottom:18px;">
+          <label for="new_pass_confirm">Şifre Tekrarı</label>
+          <input type="password" id="new_pass_confirm" name="new_password_confirm" required minlength="3" placeholder="Şifrenizi tekrar yazın">
+        </div>
+        <button class="btn" type="submit" style="width:100%; justify-content:center;">
+          {% if has_panel_password %}Şifreyi Güncelle{% else %}Şifreyi Kaydet ve Koru{% endif %}
+        </button>
+      </form>
+
+      {% if has_panel_password %}
+      <hr style="border:0; border-top:1px solid var(--card-border); margin:20px 0;">
+      <form action="/settings/panel-password" method="post" onsubmit="return confirm('Panel korumasını kaldırıp şifresiz moda geçmek istediğinize emin misiniz?');">
+        <input type="hidden" name="action_type" value="remove">
+        <button class="btn ghost sm" type="submit" style="width:100%; justify-content:center; color:var(--err); border-color:rgba(239,68,68,0.3);">
+          🔓 Şifreyi Kaldır (Şifresiz Kullan)
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    function copyText(text, btn) {
+      function showSuccess() {
+        if (btn) {
+          const original = btn.innerText;
+          btn.classList.add('copied');
+          btn.innerText = '✓ Kopyalandı';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerText = original;
+          }, 2000);
+        }
+      }
+
+      // 1. Modern Clipboard API (HTTPS veya localhost ortamında)
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(showSuccess).catch(() => {
+          fallbackCopyText(text, showSuccess);
+        });
+        return;
+      }
+
+      // 2. Güvenli olmayan HTTP / LAN / Tailscale için evrensel fallback
+      fallbackCopyText(text, showSuccess);
+    }
+
+    function fallbackCopyText(text, cb) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-999999px';
+      ta.style.top = '-999999px';
+      ta.setAttribute('readonly', '');
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, 99999);
+      try {
+        const ok = document.execCommand('copy');
+        if (ok && cb) cb();
+      } catch (err) {
+        console.error('Kopyalama hatası:', err);
+        window.prompt('Kopyalamak için Ctrl+C yapın:', text);
+      }
+      document.body.removeChild(ta);
+    }
+
+    let passShown = false;
+    function toggleApiPass() {
+      const masked = document.getElementById('apiPassMasked');
+      const real = document.getElementById('apiPassReal');
+      const btn = document.getElementById('togglePassBtn');
+      passShown = !passShown;
+      if (passShown) {
+        masked.style.display = 'none';
+        real.style.display = 'inline';
+        btn.innerText = '🙈';
+      } else {
+        masked.style.display = 'inline';
+        real.style.display = 'none';
+        btn.innerText = '👁️';
+      }
+    }
+
+    function openSecurityModal() {
+      document.getElementById('securityModal').classList.add('active');
+    }
+
+    function closeSecurityModal() {
+      document.getElementById('securityModal').classList.remove('active');
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target.id === 'securityModal') {
+        closeSecurityModal();
+      }
+    }
+
+    function autoParseM3uUrl(val) {
+      if (!val) return;
+      try {
+        const u = new URL(val.trim());
+        const user = u.searchParams.get('username') || u.searchParams.get('user');
+        const pass = u.searchParams.get('password') || u.searchParams.get('pass');
+        if (user && pass) {
+          const srv = document.getElementById('srvUrlInput');
+          const usr = document.getElementById('usernameInput');
+          const pwd = document.getElementById('passwordInput');
+          const pName = document.getElementById('provNameInput');
+          if (srv) srv.value = u.origin;
+          if (usr) usr.value = user;
+          if (pwd) pwd.value = pass;
+          if (pName && !pName.value) {
+            pName.value = u.hostname.replace('www.', '');
+          }
+        }
+      } catch (e) {}
+    }
+
+    // URL parametrelerine göre toast bildirimleri
+    const urlParams = new URLSearchParams(window.location.search);
+    const msg = urlParams.get('msg');
+    const err = urlParams.get('err');
+    const toastArea = document.getElementById('toastArea');
+
+    if (msg === 'panel_pass_updated') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel şifresi başarıyla güncellendi.</span></div>';
+    } else if (msg === 'panel_pass_removed') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel şifresi kaldırıldı. Artık şifresiz açılacaktır.</span></div>';
+    } else if (msg === 'api_pass_regenerated') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Yeni API şifresi üretildi ve kaydedildi.</span></div>';
+    } else if (msg === 'provider_added_xtream') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>M3U linkinden Xtream hesabı doğrulandı, sağlayıcı eklendi ve arka planda senkronize ediliyor!</span></div>';
+    } else if (msg === 'provider_added_m3u') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>M3U sağlayıcısı eklendi ve içerikler arka planda işleniyor!</span></div>';
+    } else if (msg === 'provider_added') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Sağlayıcı başarıyla eklendi ve arka planda senkronize ediliyor!</span></div>';
+    } else if (err === 'pass_mismatch') {
+      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Girdiğiniz şifreler eşleşmedi veya çok kısa.</span></div>';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!-- Kategori type-section içeriği (Live / VOD / Series ayrı ayrı render edilir) -->
+{% set type = content_type or (categories[0].content_type if categories else 'live') %}
+{% set cat_list = section_cats if section_cats is defined else categories %}
+<div class="type-section" id="section-{{ type }}" data-type="{{ type }}">
+  <div class="type-header">
+    <h2>{% if type=='live' %}📺 Live TV{% elif type=='vod' %}🎬 VOD{% else %}📺 Series{% endif %}</h2>
+    <div class="row" style="gap:6px;">
+      <button class="btn xs" type="button"
+              hx-post="/categories/{{ type }}/bulk"
+              hx-vals='{"action":"enable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
+              hx-target="#section-{{ type }}" hx-swap="outerHTML">Tümünü Seç</button>
+      <button class="btn xs ghost" type="button"
+              hx-post="/categories/{{ type }}/bulk"
+              hx-vals='{"action":"disable","content_type":"{{ type }}","provider_id":{{ provider.id }}}'
+              hx-target="#section-{{ type }}" hx-swap="outerHTML">Tümünü Kaldır</button>
+    </div>
+  </div>
+  {% for cat in cat_list %}
+  <div class="cat-item">
+    <form action="/categories/{{ cat.id }}/toggle" method="post" style="width:100%;">
+      <label class="check" style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;">
+        <input type="checkbox" name="enabled" {% if cat.enabled %}checked{% endif %}
+               onchange="fetch('/categories/{{ cat.id }}/toggle',{method:'POST'}).then(()=>{})">
+        <span>{{ cat.name }}</span>
+        {% if cat.is_new %}<span class="new-tag">Yeni</span>{% endif %}
+        {% if not cat.is_active %}<span class="inactive-tag">(kaldırıldı)</span>{% endif %}
+        <span class="mut small" style="margin-left:auto;">{{ cat.provider_category_id }}</span>
+      </label>
+    </form>
+  </div>
+  {% else %}
+  <div class="mut small">Bu kategoride içerik yok.</div>
+  {% endfor %}
+</div>

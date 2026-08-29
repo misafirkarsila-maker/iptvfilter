@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İlk Kurulum — Xtream Filter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d13;
+      --card-bg: rgba(22, 27, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #4f8cff;
+      --accent-glow: rgba(79, 140, 255, 0.35);
+      --accent-hover: #3a75e8;
+      --text: #f0f3f8;
+      --text-muted: #8b95a8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --input-bg: rgba(13, 16, 24, 0.9);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(79, 140, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #4f8cff, #10b981, #6366f1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(79, 140, 255, 0.12);
+      border: 1px solid rgba(79, 140, 255, 0.25);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--card-border);
+    }
+
+    /* Auto Credentials Box */
+    .auto-creds-box {
+      background: rgba(13, 17, 26, 0.8);
+      border: 1px solid rgba(79, 140, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .creds-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .creds-grid { grid-template-columns: 1fr; }
+    }
+
+    .cred-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .cred-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .cred-val-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cred-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .copy-btn.copied {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .security-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    /* Option Cards */
+    .option-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-card {
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .option-card:hover {
+      border-color: rgba(79, 140, 255, 0.35);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .option-card.active {
+      border-color: var(--accent);
+      background: rgba(79, 140, 255, 0.08);
+    }
+
+    .option-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: var(--accent);
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+    }
+
+    .option-text h4 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      color: #fff;
+    }
+
+    .option-text p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Password Input Box */
+    .password-fields {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 24px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .password-fields.hidden {
+      display: none;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #4f8cff 0%, #3a75e8 100%);
+      color: #fff;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 13px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(79, 140, 255, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79, 140, 255, 0.5);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .alert-box {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="logo-badge">
+          <span>📡</span>
+          <span>XTREAM FILTER</span>
+        </div>
+        <h1>İlk Kurulum Sihirbazı</h1>
+        <p class="subtitle">Xtream Filter başarıyla ayağa kalktı. Birkaç saniye içinde panelinizi kullanıma hazırlayabilirsiniz.</p>
+      </div>
+
+      {% if error %}
+      <div class="alert-box">
+        <span>⚠️</span>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <!-- ADIM 1: Otomatik API Bilgileri -->
+      <div class="section-title">
+        <span>1. Xtream IPTV API Hesabı</span>
+      </div>
+
+      <div class="auto-creds-box">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+          IPTV uygulamanızdan (TiviMate, IPTV Smarters vb.) filtrelenmiş yayınlara bağlanmak için kullanılacak hesap otomatik oluşturuldu:
+        </p>
+        <div class="creds-grid">
+          <div class="cred-item">
+            <div class="cred-label">Kullanıcı Adı</div>
+            <div class="cred-val-wrap">
+              <span class="cred-value" id="disp-user">{{ api_user }}</span>
+              <button type="button" class="copy-btn" onclick="copyText('{{ api_user }}', this)">
+                <span>Kopyala</span>
+              </button>
+            </div>
+          </div>
+          <div class="cred-item">
+            <div class="cred-label">API Şifresi (Otomatik)</div>
+            <div class="cred-val-wrap">
+              <span class="cred-value" id="disp-pass">{{ api_password }}</span>
+              <button type="button" class="copy-btn" onclick="copyText('{{ api_password }}', this)">
+                <span>Kopyala</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="security-notice">
+          <span>🛡️</span>
+          <span><strong>ENCRYPTION_KEY</strong> otomatik üretildi ve kalıcı olarak güvenle kaydedildi.</span>
+        </div>
+      </div>
+
+      <!-- ADIM 2: Web Panel Güvenliği -->
+      <form method="post" action="/setup" id="setupForm">
+        <div class="section-title">
+          <span>2. Web Paneli Güvenliği</span>
+        </div>
+
+        <div class="option-cards">
+          <label class="option-card active" id="cardPassword" onclick="selectOption('password')">
+            <input type="radio" name="auth_mode" value="password" id="optPassword" checked>
+            <div class="option-text">
+              <h4>Panel Şifresi Belirle (Önerilen)</h4>
+              <p>Yönetici paneline yalnızca belirlediğiniz şifreyi girerek erişilmesini sağlar.</p>
+            </div>
+          </label>
+
+          <label class="option-card" id="cardNone" onclick="selectOption('none')">
+            <input type="radio" name="auth_mode" value="none" id="optNone">
+            <div class="option-text">
+              <h4>Şifresiz Kullan</h4>
+              <p>Ev ağı veya yerel kullanım içindir. Panele giriş yaparken şifre sorulmaz.</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="password-fields" id="passwordFields">
+          <div class="form-group">
+            <label for="password">Panel Şifresi</label>
+            <input type="password" id="password" name="password" placeholder="En az 4 karakter giriniz">
+          </div>
+          <div class="form-group">
+            <label for="password_confirm">Panel Şifresi (Tekrar)</label>
+            <input type="password" id="password_confirm" name="password_confirm" placeholder="Şifrenizi tekrar yazınız">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <span>Kurulumu Tamamla ve Panele Başla</span>
+          <span>→</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<span>✓ Kopyalandı</span>';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = originalText;
+        }, 2000);
+      });
+    }
+
+    function selectOption(mode) {
+      const cardPass = document.getElementById('cardPassword');
+      const cardNone = document.getElementById('cardNone');
+      const passFields = document.getElementById('passwordFields');
+      const passInput = document.getElementById('password');
+      const passConfirm = document.getElementById('password_confirm');
+
+      if (mode === 'password') {
+        document.getElementById('optPassword').checked = true;
+        cardPass.classList.add('active');
+        cardNone.classList.remove('active');
+        passFields.classList.remove('hidden');
+        passInput.required = true;
+      } else {
+        document.getElementById('optNone').checked = true;
+        cardNone.classList.add('active');
+        cardPass.classList.remove('active');
+        passFields.classList.add('hidden');
+        passInput.required = false;
+        passConfirm.required = false;
+        passInput.value = '';
+        passConfirm.value = '';
+      }
+    }
+
+    // Form validation
+    document.getElementById('setupForm').addEventListener('submit', function(e) {
+      const mode = document.querySelector('input[name="auth_mode"]:checked').value;
+      if (mode === 'password') {
+        const p1 = document.getElementById('password').value;
+        const p2 = document.getElementById('password_confirm').value;
+        if (!p1 || p1.length < 3) {
+          e.preventDefault();
+          alert('Lütfen en az 3 karakterden oluşan bir panel şifresi belirleyin.');
+          return;
+        }
+        if (p1 !== p2) {
+          e.preventDefault();
+          alert('Girdiğiniz şifreler birbiriyle eşleşmiyor!');
+          return;
+        }
+      }
+    });
+
+    // Başlangıç durumu
+    selectOption('password');
+  </script>
+</body>
+</html>

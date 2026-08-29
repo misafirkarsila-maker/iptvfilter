@@ -1,0 +1,28 @@
+<div class="grid" id="stats">
+  {% for p in providers %}
+  <div class="card prov">
+    <div class="row" style="justify-content:space-between;">
+      <h3>{{ p.name }}</h3>
+      <span class="badge {% if p.last_sync_status=='ok' %}ok{% elif p.last_sync_status=='error' %}err{% else %}mut{% endif %}">
+        {% if p.last_sync_status=='ok' %}✓ Bağlı{% elif p.last_sync_status=='error' %}⛔ Hata{% else %}Yeni{% endif %}
+      </span>
+    </div>
+    <div class="host">{{ p.display_host }}</div>
+    <div class="small mut">
+      Son senkronizasyon:
+      {{ p.last_sync_at.strftime('%d.%m.%Y %H:%M') if p.last_sync_at else '—' }}
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <a class="btn sm" href="/providers/{{ p.id }}">Ayarlar</a>
+      {% if p.last_sync_status=='error' and p.last_sync_error %}
+      <span class="small mut" title="{{ p.last_sync_error }}">⛔</span>
+      {% endif %}
+      <form action="/providers/{{ p.id }}/delete" method="post" style="display:inline;" onsubmit="return confirm('Bu sağlayıcıyı silmek istediğinize emin misiniz?');">
+        <button class="btn danger sm" type="submit">Sil</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="card mut">Henüz sağlayıcı eklenmemiş.</div>
+  {% endfor %}
+</div>

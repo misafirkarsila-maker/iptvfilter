@@ -1,0 +1,37 @@
+# Xtream Filter — Production Docker Compose (GHCR)
+# Kullanım: curl -O <raw-url> && docker compose up -d
+# Tüm default'lar yaml içinde, .env GEREK YOK
+# Override: docker compose up -d -e API_PASSWORD=xxx -e PANEL_PASSWORD=yyy
+
+services:
+  xtream-filter:
+    image: ghcr.io/misafirkarsila-maker/xtream-playlist-manager:latest
+    container_name: xtream-filter
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # ---- Uygulama ----
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      # ---- Veritabanı ----
+      - DATABASE_URL=sqlite:////app/data/app.db
+      # ---- Panel / API Kimlik Doğrulama (İsteğe bağlı override edilebilir) ----
+      - API_USER=myuser
+      # API_PASSWORD ve PANEL_PASSWORD belirtilmezse otomatik yönetilir (web panelden)
+      # - API_PASSWORD=
+      # - PANEL_PASSWORD=
+      # ---- Şifreleme (boş bırakılırsa otomatik üretilip data/ altına güvenle kaydedilir) ----
+      # - ENCRYPTION_KEY=
+      # ---- Otomatik Senkronizasyon (Cron) ----
+      - SYNC_CRON=0 3 * * *
+      # ---- Log ----
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
