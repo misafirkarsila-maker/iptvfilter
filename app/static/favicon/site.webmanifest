@@ -1,0 +1,25 @@
+{
+  "name": "IPTV Filter & Playlist Manager",
+  "short_name": "IPTV Filter",
+  "description": "Akıllı IPTV Çalma Listesi Birleştirici ve Kanal Filtresi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0b0d13",
+  "background_color": "#0b0d13",
+  "icons": [
+    {
+      "src": "/static/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}

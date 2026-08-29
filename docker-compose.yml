@@ -5,12 +5,11 @@
 
 services:
   xtream-filter:
-    build: .
-    image: ghcr.io/misafirkarsila-maker/xtream-playlist-manager:latest
+    image: ghcr.io/misafirkarsila-maker/iptvfilter:latest
     container_name: xtream-filter
     restart: unless-stopped
     ports:
-      - "${HOST_PORT:-4788}:8000"
+      - "8000:8000"
     environment:
       # ---- Uygulama ----
       - APP_HOST=0.0.0.0
@@ -30,7 +29,6 @@ services:
       - LOG_LEVEL=INFO
     volumes:
       - ./data:/app/data
-      - ./app:/app/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

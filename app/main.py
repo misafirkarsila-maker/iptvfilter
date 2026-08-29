@@ -42,8 +42,27 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Xtream Filter", lifespan=lifespan)
 
+from fastapi.responses import FileResponse
+
 # Statik
 app.mount("/static", StaticFiles(directory=str(config.BASE_DIR / "app" / "static")), name="static")
+
+# PWA / Favicon Kök Yolları
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(str(config.BASE_DIR / "app" / "static" / "favicon" / "favicon.ico"), media_type="image/x-icon")
+
+@app.get("/site.webmanifest", include_in_schema=False)
+async def manifest():
+    return FileResponse(str(config.BASE_DIR / "app" / "static" / "favicon" / "site.webmanifest"), media_type="application/manifest+json")
+
+@app.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    return FileResponse(
+        str(config.BASE_DIR / "app" / "static" / "sw.js"),
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/"}
+    )
 
 # Dashboard (web panel)
 app.include_router(dashboard_router)
