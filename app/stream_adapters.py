@@ -24,11 +24,11 @@ class StreamUrlAdapter(ABC):
         pass
 
     @abstractmethod
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         pass
 
     @abstractmethod
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         pass
 
     def get_name(self) -> str:
@@ -45,19 +45,23 @@ class StandardXtreamAdapter(StreamUrlAdapter):
         url = f"{base}/live/{provider.username}/{pwd}/{stream.provider_stream_id}.ts"
         return StreamUrlParts(url=url)
 
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
-        ext = stream.extension or "mp4"
+        ext = (extension or stream.extension or stream.container or "mkv").strip().lstrip(".")
         url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
         return StreamUrlParts(url=url)
 
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
-        url = f"{base}/series/{provider.username}/{pwd}/{stream.provider_stream_id}"
+        ext = (extension or stream.extension or stream.container or "").strip().lstrip(".")
+        if ext:
+            url = f"{base}/series/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
+        else:
+            url = f"{base}/series/{provider.username}/{pwd}/{stream.provider_stream_id}"
         return StreamUrlParts(url=url)
 
 
@@ -71,18 +75,20 @@ class HlsM3U8Adapter(StreamUrlAdapter):
         url = f"{base}/live/{provider.username}/{pwd}/{stream.provider_stream_id}.m3u8"
         return StreamUrlParts(url=url)
 
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
-        url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}.m3u8"
+        ext = (extension or "m3u8").strip().lstrip(".")
+        url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
         return StreamUrlParts(url=url)
 
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
-        url = f"{base}/series/{provider.username}/{pwd}/{stream.provider_stream_id}.m3u8"
+        ext = (extension or "m3u8").strip().lstrip(".")
+        url = f"{base}/series/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
         return StreamUrlParts(url=url)
 
 
@@ -98,13 +104,13 @@ class DirectSourceAdapter(StreamUrlAdapter):
     def build_live_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
         return self._build(provider, stream)
 
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
         if stream.stream_source and stream.stream_source != "xtream":
             return StreamUrlParts(url=stream.stream_source)
-        return StandardXtreamAdapter().build_vod_url(provider, stream)
+        return StandardXtreamAdapter().build_vod_url(provider, stream, extension=extension)
 
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
-        return StandardXtreamAdapter().build_series_url(provider, stream)
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
+        return StandardXtreamAdapter().build_series_url(provider, stream, extension=extension)
 
 
 class CustomPathAdapter(StreamUrlAdapter):
@@ -115,15 +121,16 @@ class CustomPathAdapter(StreamUrlAdapter):
         self.vod_template = vod_template or "/movie/{username}/{password}/{stream_id}.{ext}"
         self.series_template = series_template or "/series/{username}/{password}/{stream_id}"
 
-    def _render(self, provider: Provider, stream: Stream, template: str) -> str:
+    def _render(self, provider: Provider, stream: Stream, template: str, extension: Optional[str] = None) -> str:
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
+        ext = (extension or stream.extension or stream.container or "mkv").strip().lstrip(".")
         return base + template.format(
             username=provider.username,
             password=pwd,
             stream_id=stream.provider_stream_id,
-            ext=stream.extension or "mp4",
+            ext=ext,
             name=stream.name,
             provider_id=provider.id
         )
@@ -131,11 +138,11 @@ class CustomPathAdapter(StreamUrlAdapter):
     def build_live_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
         return StreamUrlParts(url=self._render(provider, stream, self.live_template))
 
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
-        return StreamUrlParts(url=self._render(provider, stream, self.vod_template))
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
+        return StreamUrlParts(url=self._render(provider, stream, self.vod_template, extension=extension))
 
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
-        return StreamUrlParts(url=self._render(provider, stream, self.series_template))
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
+        return StreamUrlParts(url=self._render(provider, stream, self.series_template, extension=extension))
 
 
 class M3UPlaylistAdapter(StreamUrlAdapter):
@@ -165,11 +172,11 @@ class M3UPlaylistAdapter(StreamUrlAdapter):
         url = base + pattern.format(username=provider.username, password=pwd, stream_id=stream.provider_stream_id)
         return StreamUrlParts(url=url)
 
-    def build_vod_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
-        return StandardXtreamAdapter().build_vod_url(provider, stream)
+    def build_vod_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
+        return StandardXtreamAdapter().build_vod_url(provider, stream, extension=extension)
 
-    def build_series_url(self, provider: Provider, stream: Stream) -> StreamUrlParts:
-        return StandardXtreamAdapter().build_series_url(provider, stream)
+    def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:
+        return StandardXtreamAdapter().build_series_url(provider, stream, extension=extension)
 
 
 # ==================== ADAPTER REGISTRY ====================

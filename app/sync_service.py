@@ -141,12 +141,36 @@ def sync_streams(db: Session, provider: Provider, ctype: str, streams: list[dict
             Stream.provider_stream_id == sid
         ).first()
 
+        raw_ext = (raw.get("container_extension") or raw.get("target_container") or raw.get("container") or "").strip().lstrip(".") or None
+        raw_rating = raw.get("rating")
+        try:
+            raw_rating = float(raw_rating) if raw_rating is not None and str(raw_rating).strip() != "" else None
+        except (ValueError, TypeError):
+            raw_rating = None
+        raw_year = str(raw.get("year") or raw.get("releaseDate") or raw.get("release_date") or "").strip() or None
+        raw_desc = str(raw.get("plot") or raw.get("description") or "").strip() or None
+        raw_added = str(raw.get("added") or raw.get("added_at") or "").strip() or None
+        raw_icon = raw.get("stream_icon") or raw.get("cover")
+
         if existing:
             existing.name = name
             existing.is_active = True
             existing.last_seen_at = now
             existing.category_id = actual_cat_id
             existing.provider_category_id = cat_id
+            if raw_ext:
+                existing.extension = raw_ext
+                existing.container = raw_ext
+            if raw_icon:
+                existing.stream_icon = raw_icon
+            if raw_rating is not None:
+                existing.rating = raw_rating
+            if raw_year:
+                existing.year = raw_year
+            if raw_desc:
+                existing.description = raw_desc
+            if raw_added:
+                existing.added_at = raw_added
         else:
             new_s = Stream(
                 provider_id=provider.id,
@@ -158,7 +182,13 @@ def sync_streams(db: Session, provider: Provider, ctype: str, streams: list[dict
                 is_active=True,
                 last_seen_at=now,
                 enabled=True,
-                stream_icon=raw.get("stream_icon") or raw.get("cover")
+                stream_icon=raw_icon,
+                extension=raw_ext,
+                container=raw_ext,
+                rating=raw_rating,
+                year=raw_year,
+                description=raw_desc,
+                added_at=raw_added,
             )
             db.add(new_s)
         count += 1

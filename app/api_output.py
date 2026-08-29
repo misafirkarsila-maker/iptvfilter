@@ -64,12 +64,14 @@ def get_active_providers_or_503(db: Session) -> list[Provider]:
 
 # ===================== PLAYER API =====================
 
-@router.api_route("/player_api.php", methods=["GET", "POST"])
+@router.api_route("/player_api.php", methods=["GET", "POST", "HEAD"])
 async def player_api(
     request: Request,
     db: Session = Depends(get_db),
     action: Optional[str] = None,
     stream_id: Optional[str] = None,
+    series_id: Optional[str] = None,
+    vod_id: Optional[str] = None,
     category_id: Optional[str] = None,
     username: Optional[str] = None,
     password: Optional[str] = None,
@@ -80,11 +82,16 @@ async def player_api(
             form = await request.form()
             action = action or form.get("action")
             stream_id = stream_id or form.get("stream_id")
+            series_id = series_id or form.get("series_id")
+            vod_id = vod_id or form.get("vod_id")
             category_id = category_id or form.get("category_id")
             username = username or form.get("username")
             password = password or form.get("password")
         except Exception:
             pass
+
+    series_id = series_id or request.query_params.get("series_id")
+    vod_id = vod_id or request.query_params.get("vod_id")
 
     expected_user = settings_manager.get_api_username()
     expected_pass = settings_manager.get_api_password()
@@ -182,6 +189,69 @@ async def player_api(
             return {"epg_listings": listings}
 
         return {"epg_listings": []}
+
+    # 5. Dizi Detayları ve Bölümleri (get_series_info)
+    if action == "get_series_info" and series_id:
+        clean_sid = str(series_id).split(".")[0]
+        stream = db.query(Stream).get(int(clean_sid)) if clean_sid.isdigit() else None
+        if not stream:
+            stream = db.query(Stream).filter(Stream.provider_stream_id == str(series_id)).first()
+
+        target_prov = stream.provider if stream else None
+        if not target_prov and providers:
+            target_prov = providers[0]
+
+        if target_prov:
+            import httpx
+            from . import crypto_util
+            pwd = crypto_util.decrypt(target_prov.password_enc)
+            prov_sid = stream.provider_stream_id if stream else clean_sid
+            prov_url = f"{target_prov.server_url.rstrip('/')}/player_api.php"
+            try:
+                with httpx.Client(timeout=15.0) as client:
+                    resp = client.get(prov_url, params={
+                        "username": target_prov.username,
+                        "password": pwd,
+                        "action": "get_series_info",
+                        "series_id": prov_sid
+                    }, headers={"User-Agent": "IPTVSmartersPro"})
+                    if resp.status_code == 200:
+                        return resp.json()
+            except Exception as ex:
+                logger.error("get_series_info proxy hatasi: %s", ex)
+        return {"seasons": [], "info": {}, "episodes": {}}
+
+    # 6. Film / VOD Detayları (get_vod_info)
+    if action == "get_vod_info" and (vod_id or stream_id):
+        vid = vod_id or stream_id
+        clean_vid = str(vid).split(".")[0]
+        stream = db.query(Stream).get(int(clean_vid)) if clean_vid.isdigit() else None
+        if not stream:
+            stream = db.query(Stream).filter(Stream.provider_stream_id == str(vid)).first()
+
+        target_prov = stream.provider if stream else None
+        if not target_prov and providers:
+            target_prov = providers[0]
+
+        if target_prov:
+            import httpx
+            from . import crypto_util
+            pwd = crypto_util.decrypt(target_prov.password_enc)
+            prov_vid = stream.provider_stream_id if stream else clean_vid
+            prov_url = f"{target_prov.server_url.rstrip('/')}/player_api.php"
+            try:
+                with httpx.Client(timeout=15.0) as client:
+                    resp = client.get(prov_url, params={
+                        "username": target_prov.username,
+                        "password": pwd,
+                        "action": "get_vod_info",
+                        "vod_id": prov_vid
+                    }, headers={"User-Agent": "IPTVSmartersPro"})
+                    if resp.status_code == 200:
+                        return resp.json()
+            except Exception as ex:
+                logger.error("get_vod_info proxy hatasi: %s", ex)
+        return {"info": {}, "movie_data": {}}
 
     raise HTTPException(400, f"Bilinmeyen action: {action}")
 

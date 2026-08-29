@@ -185,7 +185,7 @@ def get_aggregated_streams(
                     "rating_5based": 0,
                     "added": s.added_at or "",
                     "category_id": agg_cat_id,
-                    "container_extension": s.extension or "mp4",
+                    "container_extension": s.extension or s.container or "mkv",
                     "direct_source": "",
                 })
             elif ctype == "series":
@@ -230,9 +230,9 @@ def get_aggregated_m3u(db: Session, request: Request, ctype_filter: Optional[str
             if ctype == "live":
                 play_url = adapter.build_live_url(prov, s).url
             elif ctype == "vod":
-                play_url = adapter.build_vod_url(prov, s).url
+                play_url = adapter.build_vod_url(prov, s, extension=s.extension).url
             else:
-                play_url = adapter.build_series_url(prov, s).url
+                play_url = adapter.build_series_url(prov, s, extension=s.extension).url
 
             lines.append(f'#EXTINF:-1 tvg-id="{s.id}" tvg-name="{s.name}" tvg-logo="{logo}" group-title="{group}",{s.name}')
             lines.append(play_url)
@@ -287,14 +287,30 @@ def get_aggregated_xmltv(db: Session) -> str:
 def resolve_stream_playback_url(db: Session, raw_stream_id: str, ctype: str = "live") -> Optional[str]:
     """TiviMate gibi Xtream client'lar /live/... veya /{user}/{pass}/{id} istediğinde
     Stream ID'den doğru Provider ve Stream modelini bulup direct URL'i üretir."""
-    # Uzantıyı ayıkla (99.ts -> 99, 99.mp4 -> 99, 99 -> 99)
-    clean_id = raw_stream_id.split(".")[0]
+    # Uzantıyı ayıkla (99.ts -> (99, ts), 99.mkv -> (99, mkv), 99 -> (99, None))
+    parts = raw_stream_id.split(".", 1)
+    clean_id = parts[0]
+    req_ext = parts[1] if len(parts) > 1 else None
+
     stream = None
     if clean_id.isdigit():
         stream = db.query(Stream).get(int(clean_id))
 
     if not stream or not stream.provider:
         stream = db.query(Stream).filter(Stream.provider_stream_id == clean_id).first()
+
+    # Dizi bölümü isteği ise ve stream tablosunda bulunamadıysa:
+    if not stream and ctype == "series":
+        providers = get_active_providers(db)
+        if providers:
+            prov = providers[0]
+            from . import crypto_util
+            pwd = crypto_util.decrypt(prov.password_enc)
+            base = prov.server_url.rstrip("/")
+            if req_ext:
+                return f"{base}/series/{prov.username}/{pwd}/{clean_id}.{req_ext}"
+            return f"{base}/series/{prov.username}/{pwd}/{clean_id}"
+        return None
 
     if not stream or not stream.provider:
         return None
@@ -304,9 +320,10 @@ def resolve_stream_playback_url(db: Session, raw_stream_id: str, ctype: str = "l
 
     # Stream'in kendi gerçek içerik türünü kullan
     stream_type = stream.content_type or ctype
+    ext = req_ext or stream.extension or stream.container
     if stream_type == "vod":
-        return adapter.build_vod_url(prov, stream).url
+        return adapter.build_vod_url(prov, stream, extension=ext).url
     elif stream_type == "series":
-        return adapter.build_series_url(prov, stream).url
+        return adapter.build_series_url(prov, stream, extension=ext).url
     else:
         return adapter.build_live_url(prov, stream).url
