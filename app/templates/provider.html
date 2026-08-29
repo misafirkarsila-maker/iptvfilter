@@ -122,61 +122,79 @@
       background: transparent;
       border: none;
       color: var(--mut);
-      padding: 4px 8px;
-      font-size: 0.72rem;
+      padding: 4px 7px;
+      font-size: 0.95rem;
+      line-height: 1;
       cursor: pointer;
       font-weight: 500;
       transition: all 0.15s;
     }
-    .lang-btn:hover { color: var(--txt); }
+    .lang-btn:hover { background: rgba(255, 255, 255, 0.05); }
     .lang-btn.active {
       background: rgba(79, 140, 255, 0.2);
-      color: #93c5fd;
-      font-weight: 700;
     }
 
-    /* Basit Proxy İkon Butonu */
+    /* Basit Proxy İkon Butonu (Kalkan) */
     .proxy-icon-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 29px;
-      height: 27px;
+      width: 30px;
+      height: 28px;
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       border: 1px solid var(--line);
       background: rgba(0, 0, 0, 0.25);
       cursor: pointer;
       text-decoration: none;
       transition: all 0.15s;
       flex-shrink: 0;
-      position: relative;
+      padding: 0;
     }
     .proxy-icon-btn:hover {
       border-color: rgba(255, 255, 255, 0.25);
       background: rgba(255, 255, 255, 0.05);
     }
+    /* Proxy Kapalı: Gri Kalkan */
+    .proxy-icon-btn .shield-icon {
+      filter: grayscale(100%) opacity(0.42);
+      transition: all 0.2s;
+      display: inline-block;
+      line-height: 1;
+    }
+    /* Proxy Açık: Renkli Canlı Kalkan */
     .proxy-icon-btn.active {
       background: rgba(16, 185, 129, 0.15);
       border-color: rgba(16, 185, 129, 0.4);
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
-    .proxy-icon-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--ok);
-      box-shadow: 0 0 4px var(--ok);
+    .proxy-icon-btn.active .shield-icon {
+      filter: none;
+      transform: scale(1.06);
+    }
+
+    .topbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .btn-label-desktop {
+      display: inline;
     }
 
     /* Mobil Uyumluluk */
     @media (max-width: 640px) {
+      .btn-label-desktop {
+        display: none !important;
+      }
+      .topbar-btn {
+        padding: 4px 8px !important;
+        min-width: 28px;
+        justify-content: center;
+      }
       .wrap { padding: 12px 10px 40px; }
-      h1 { font-size: 1.2rem; }
+      h1 { font-size: 1.15rem; }
       .cat-item { padding: 8px 10px; gap: 8px; flex-wrap: wrap; }
       .cat-group-header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .cat-group-actions { width: 100%; justify-content: flex-end; }
@@ -187,18 +205,20 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="row" style="justify-content:space-between; margin-bottom:8px;">
-      <h1>{{ provider.name }}</h1>
-      <div style="display:flex; align-items:center; gap:8px;">
+    <div class="row" style="justify-content:space-between; margin-bottom:12px; flex-wrap:nowrap;">
+      <h1 style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">{{ provider.name }}</h1>
+      <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
         <a href="/" class="proxy-icon-btn {% if stream_proxy_enabled %}active{% endif %}"
            title="{% if stream_proxy_enabled %}Video Proxy: Aktif (Sunucu Üzerinden){% else %}Yayın Modu: 302 Doğrudan (Proxy Kapalı){% endif %}">
-          <span>{% if stream_proxy_enabled %}🛡️{% else %}⚡{% endif %}</span>
+          <span class="shield-icon">🛡️</span>
         </a>
         <div class="lang-switcher">
-          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')">🇹🇷 TR</button>
-          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')" title="Türkçe">🇹🇷</button>
+          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')" title="English">🇬🇧</button>
         </div>
-        <a class="btn ghost sm" href="/" data-i18n="back_btn">← Geri</a>
+        <a class="btn ghost sm topbar-btn" href="/" title="Ana Sayfaya Dön">
+          <span>←</span><span class="btn-label-desktop" data-i18n="back_btn">Geri</span>
+        </a>
       </div>
     </div>
 
@@ -466,7 +486,7 @@
     // ================= DİL DESTEĞİ (i18n) =================
     const providerI18n = {
       tr: {
-        "back_btn": "← Geri",
+        "back_btn": "Geri",
         "server_lbl": "Sunucu:",
         "user_lbl": "Kullanıcı:",
         "total_content_lbl": "Toplam içerik:",
@@ -489,7 +509,7 @@
         "footer_note": "Bu sağlayıcı için aktif kategoriler kendi Xtream API'ne otomatik yansır."
       },
       en: {
-        "back_btn": "← Back",
+        "back_btn": "Back",
         "server_lbl": "Server:",
         "user_lbl": "User:",
         "total_content_lbl": "Total streams:",

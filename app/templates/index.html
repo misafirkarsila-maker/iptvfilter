@@ -486,35 +486,34 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       background: rgba(0, 0, 0, 0.25);
+      flex-shrink: 0;
     }
     .lang-btn {
       background: transparent;
       border: none;
       color: var(--mut);
-      padding: 5px 9px;
-      font-size: 0.75rem;
+      padding: 4px 7px;
+      font-size: 0.95rem;
+      line-height: 1;
       cursor: pointer;
-      font-weight: 500;
       transition: all 0.15s;
     }
     .lang-btn:hover {
-      color: var(--txt);
+      background: rgba(255, 255, 255, 0.05);
     }
     .lang-btn.active {
       background: rgba(79, 140, 255, 0.2);
-      color: #93c5fd;
-      font-weight: 700;
     }
 
-    /* Basit Proxy İkon Butonu */
+    /* Basit Proxy İkon Butonu (Kalkan) */
     .proxy-icon-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 31px;
+      width: 32px;
       height: 29px;
       border-radius: var(--radius-md);
-      font-size: 0.95rem;
+      font-size: 1rem;
       border: 1px solid var(--card-border);
       background: rgba(0, 0, 0, 0.25);
       cursor: pointer;
@@ -522,37 +521,55 @@
       transition: all 0.15s;
       flex-shrink: 0;
       padding: 0;
-      position: relative;
     }
     .proxy-icon-btn:hover {
       border-color: rgba(255, 255, 255, 0.25);
       background: rgba(255, 255, 255, 0.05);
     }
+    /* Proxy Kapalı: Gri Kalkan */
+    .proxy-icon-btn .shield-icon {
+      filter: grayscale(100%) opacity(0.42);
+      transition: all 0.2s;
+      display: inline-block;
+      line-height: 1;
+    }
+    /* Proxy Açık: Renkli Canlı Kalkan */
     .proxy-icon-btn.active {
       background: rgba(16, 185, 129, 0.15);
       border-color: rgba(16, 185, 129, 0.4);
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
-    .proxy-icon-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--ok);
-      box-shadow: 0 0 4px var(--ok);
+    .proxy-icon-btn.active .shield-icon {
+      filter: none;
+      transform: scale(1.06);
+    }
+
+    .topbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .btn-label-desktop {
+      display: inline;
     }
 
     /* Mobil Uyumluluk (Mobile Responsive) */
-    @media (max-width: 680px) {
+    @media (max-width: 768px) {
+      .btn-label-desktop {
+        display: none !important;
+      }
+      .topbar-btn {
+        padding: 5px 8px !important;
+        font-size: 0.95rem !important;
+        min-width: 32px;
+        justify-content: center;
+      }
       .wrap { padding: 12px 10px 40px; }
-      .topbar { gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .brand-logo { font-size: 1.2rem; }
-      h1 { font-size: 1.1rem; }
-      .topbar-actions { gap: 6px; }
-      .topbar-actions .btn { font-size: 0.72rem; padding: 5px 8px; white-space: nowrap; }
+      .topbar { gap: 6px; margin-bottom: 16px; padding-bottom: 12px; }
+      .brand-logo { font-size: 1.15rem; }
+      h1 { font-size: 1.05rem; }
+      .topbar-actions { gap: 5px; }
       .api-card { padding: 14px; }
       .api-grid { grid-template-columns: 1fr; gap: 8px; }
       .quick-links { padding: 10px; }
@@ -574,40 +591,42 @@
       </div>
 
       <div class="topbar-actions">
-        <!-- Basit Proxy Durum İkonu -->
+        <!-- Basit Proxy Durum İkonu (Kalkan) -->
         <button type="button" id="topbarProxyPill"
                 class="proxy-icon-btn {% if stream_proxy_enabled %}active{% endif %}"
                 onclick="onProxyBtnClick()"
                 title="{% if stream_proxy_enabled %}Video Proxy: Aktif (Sunucu Üzerinden){% else %}Yayın Modu: 302 Doğrudan (Proxy Kapalı){% endif %}">
-          <span id="topbarProxyIcon">{% if stream_proxy_enabled %}🛡️{% else %}⚡{% endif %}</span>
+          <span id="topbarProxyIcon" class="shield-icon">🛡️</span>
         </button>
 
-        <!-- Dil Seçici -->
+        <!-- Dil Seçici (Sadece Bayraklar) -->
         <div class="lang-switcher">
-          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')">🇹🇷 TR</button>
-          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+          <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')" title="Türkçe">🇹🇷</button>
+          <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')" title="English">🇬🇧</button>
         </div>
 
         <!-- Panel Şifre Durumu Rozeti & Ayar Butonu -->
         {% if has_panel_password %}
-        <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları">
-          <span data-i18n="panel_protected">🔒 Panel Korumalı</span>
+        <button class="btn ghost sm topbar-btn" onclick="openSecurityModal()" title="Panel Korumalı (Şifre Ayarları)">
+          <span>🔒</span><span class="btn-label-desktop" data-i18n="panel_protected">Panel Korumalı</span>
         </button>
         {% else %}
-        <button class="btn ghost sm" onclick="openSecurityModal()" title="Panel Şifre Ayarları" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);">
-          <span data-i18n="panel_unprotected">🔓 Şifresiz Panel</span>
+        <button class="btn ghost sm topbar-btn" onclick="openSecurityModal()" title="Şifresiz Panel (Şifre Ayarları)" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);">
+          <span>🔓</span><span class="btn-label-desktop" data-i18n="panel_unprotected">Şifresiz Panel</span>
         </button>
         {% endif %}
 
-        <form action="/sync" method="post" style="display:inline;" hx-post="/sync" hx-target="#stats" hx-swap="innerHTML">
-          <button class="btn sm" type="submit">
-            <span data-i18n="sync_now">⚡ Şimdi Güncelle</span>
+        <form action="/sync" method="post" style="display:inline; margin:0;" hx-post="/sync" hx-target="#stats" hx-swap="innerHTML">
+          <button class="btn sm topbar-btn" type="submit" title="Tüm Sağlayıcıları Şimdi Güncelle">
+            <span>⚡</span><span class="btn-label-desktop" data-i18n="sync_now">Şimdi Güncelle</span>
           </button>
         </form>
 
         {% if has_panel_password %}
-        <form action="/logout" method="post" style="display:inline;">
-          <button class="btn ghost sm" type="submit" data-i18n="logout">Çıkış</button>
+        <form action="/logout" method="post" style="display:inline; margin:0;">
+          <button class="btn ghost sm topbar-btn" type="submit" title="Çıkış Yap">
+            <span>🚪</span><span class="btn-label-desktop" data-i18n="logout">Çıkış</span>
+          </button>
         </form>
         {% endif %}
       </div>
@@ -1135,7 +1154,7 @@
             topbarPill.title = 'Yayın Modu: 302 Doğrudan (Proxy Kapalı)';
           }
           if (topbarIcon) {
-            topbarIcon.innerText = '⚡';
+            topbarIcon.innerText = '🛡️';
           }
 
           if (toastArea) {
@@ -1219,9 +1238,9 @@
     const i18nData = {
       tr: {
         "brand_title": "Xtream Filter",
-        "sync_now": "⚡ Şimdi Güncelle",
-        "panel_protected": "🔒 Panel Korumalı",
-        "panel_unprotected": "🔓 Şifresiz Panel",
+        "sync_now": "Şimdi Güncelle",
+        "panel_protected": "Panel Korumalı",
+        "panel_unprotected": "Şifresiz Panel",
         "logout": "Çıkış",
         "api_card_title": "Xtream API Bağlantı Bilgileri",
         "edit_api_pass": "✏️ PIN Belirle",
@@ -1272,9 +1291,9 @@
       },
       en: {
         "brand_title": "Xtream Filter",
-        "sync_now": "⚡ Sync Now",
-        "panel_protected": "🔒 Protected Panel",
-        "panel_unprotected": "🔓 Open Panel",
+        "sync_now": "Sync Now",
+        "panel_protected": "Protected",
+        "panel_unprotected": "Open Panel",
         "logout": "Logout",
         "api_card_title": "Xtream API & Connection Credentials",
         "edit_api_pass": "✏️ Set PIN",
