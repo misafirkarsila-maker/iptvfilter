@@ -4,7 +4,9 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import config, crypto_util, settings_manager
@@ -26,13 +28,6 @@ async def lifespan(app: FastAPI):
     settings_manager.init_security_settings()
     crypto_util.init_encryption_key()
     config.reload_security_config()
-    try:
-        from .database import SessionLocal
-        from .category_grouper import backfill_category_parents
-        with SessionLocal() as db:
-            backfill_category_parents(db)
-    except Exception as exc:
-        logging.warning("Kategori üst başlık güncelleme hatası: %s", exc)
     start_scheduler()
     logging.info("Xtream Filter başlatıldı. API Kullanıcı: %s", config.API_USERNAME)
     yield
@@ -42,21 +37,51 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Xtream Filter", lifespan=lifespan)
 
-from fastapi.responses import FileResponse
+MAIN_PANEL_DOMAIN = os.getenv("MAIN_PANEL_DOMAIN", "iptvfilter.online").strip()
+API_SERVER_DOMAIN = os.getenv("API_SERVER_DOMAIN", "newlist.best").strip()
 
-# Statik
+
+@app.middleware("http")
+async def enforce_dedicated_api_domain(request: Request, call_next):
+    """newlist.best yalnızca TV API & M3U akışlarına hizmet verir.
+    Web paneline (giriş, kayıt, yönetim vb.) gelen tarayıcı isteklerini ana panele (iptvfilter.online) yönlendirir.
+    """
+    host = request.headers.get("host", "").split(":")[0].lower()
+    if API_SERVER_DOMAIN and host == API_SERVER_DOMAIN.lower():
+        path = request.url.path
+        # Web paneline ait sayfalar (yalnızca bunlar ana panele yönlendirilir)
+        panel_routes = (
+            "/login", "/register", "/logout", "/providers", "/categories",
+            "/settings", "/board", "/sync", "/static", "/docs", "/redoc", "/openapi.json"
+        )
+        is_panel_page = (
+            path == "/"
+            or path == ""
+            or any(path.startswith(p) for p in panel_routes)
+            or (path == "/admin" or path.startswith("/admin/users") or path.startswith("/admin/settings"))
+        )
+        if is_panel_page:
+            target_url = f"https://{MAIN_PANEL_DOMAIN}{path}"
+            if request.url.query:
+                target_url += f"?{request.url.query}"
+            return RedirectResponse(target_url, status_code=302)
+
+    return await call_next(request)
+
+
+# Statik dosyalar
 app.mount("/static", StaticFiles(directory=str(config.BASE_DIR / "app" / "static")), name="static")
 
 # PWA / Favicon Kök Yolları
-@app.get("/favicon.ico", include_in_schema=False)
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
 async def favicon():
     return FileResponse(str(config.BASE_DIR / "app" / "static" / "favicon" / "favicon.ico"), media_type="image/x-icon")
 
-@app.get("/site.webmanifest", include_in_schema=False)
+@app.api_route("/site.webmanifest", methods=["GET", "HEAD"], include_in_schema=False)
 async def manifest():
     return FileResponse(str(config.BASE_DIR / "app" / "static" / "favicon" / "site.webmanifest"), media_type="application/manifest+json")
 
-@app.get("/sw.js", include_in_schema=False)
+@app.api_route("/sw.js", methods=["GET", "HEAD"], include_in_schema=False)
 async def service_worker():
     return FileResponse(
         str(config.BASE_DIR / "app" / "static" / "sw.js"),
