@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import httpx
 from sqlalchemy.orm import Session
 
 from . import config, crypto_util, settings_manager
@@ -231,7 +233,69 @@ async def m3u_playlist(
         }
     )
 
-# ===================== DIRECT STREAM PLAYBACK (TiviMate & Xtream Codes) =====================
+# ===================== STREAM PLAYBACK (Direct 302 vs Stream Proxy) =====================
+
+STREAM_USER_AGENT = "VLC/3.0.20 LibVLC/3.0.20"
+
+async def proxy_stream_response(upstream_url: str, request: Request):
+    """Video akışını sunucu üzerinden istemciye proxy eder (Reverse Stream Proxy)."""
+    headers = {
+        "User-Agent": STREAM_USER_AGENT,
+        "Accept": "*/*",
+    }
+    if "range" in request.headers:
+        headers["Range"] = request.headers["range"]
+
+    client = httpx.AsyncClient(
+        follow_redirects=True,
+        timeout=httpx.Timeout(connect=15.0, read=None, write=15.0, pool=None)
+    )
+
+    try:
+        req = client.build_request(request.method, upstream_url, headers=headers)
+        upstream_resp = await client.send(req, stream=True)
+    except Exception as exc:
+        await client.aclose()
+        logger.error("Proxy stream upstream hatası (%s): %s", upstream_url, exc)
+        raise HTTPException(502, f"Sağlayıcıya bağlanılamadı: {exc}")
+
+    if request.method == "HEAD":
+        resp_headers = dict(upstream_resp.headers)
+        status_code = upstream_resp.status_code
+        await upstream_resp.aclose()
+        await client.aclose()
+        return Response(status_code=status_code, headers=resp_headers)
+
+    if upstream_resp.status_code >= 400:
+        status_code = upstream_resp.status_code
+        await upstream_resp.aclose()
+        await client.aclose()
+        raise HTTPException(status_code, "Sağlayıcı yayın hatası döndürdü")
+
+    response_headers = {}
+    for h in ("content-type", "content-length", "content-range", "accept-ranges"):
+        if h in upstream_resp.headers:
+            response_headers[h] = upstream_resp.headers[h]
+
+    media_type = upstream_resp.headers.get("content-type") or "video/mp2t"
+
+    async def stream_generator():
+        try:
+            async for chunk in upstream_resp.aiter_bytes(chunk_size=65536):
+                yield chunk
+        except Exception:
+            pass
+        finally:
+            await upstream_resp.aclose()
+            await client.aclose()
+
+    return StreamingResponse(
+        stream_generator(),
+        status_code=upstream_resp.status_code,
+        headers=response_headers,
+        media_type=media_type,
+    )
+
 
 @router.api_route("/live/{username}/{password}/{stream_id}", methods=["GET", "HEAD"])
 async def play_live_stream(
@@ -251,8 +315,11 @@ async def play_live_stream(
     if not play_url:
         raise HTTPException(404, "Canlı yayın akışı bulunamadı")
 
-    # Proxy YOK — Doğrudan sağlayıcıya HTTP 302 yönlendirmesi
-    return RedirectResponse(url=play_url, status_code=302)
+    if not settings_manager.is_stream_proxy_enabled():
+        return RedirectResponse(url=play_url, status_code=302)
+
+    return await proxy_stream_response(play_url, request)
+
 
 @router.api_route("/movie/{username}/{password}/{stream_id}", methods=["GET", "HEAD"])
 async def play_movie_stream(
@@ -272,7 +339,11 @@ async def play_movie_stream(
     if not play_url:
         raise HTTPException(404, "Film akışı bulunamadı")
 
-    return RedirectResponse(url=play_url, status_code=302)
+    if not settings_manager.is_stream_proxy_enabled():
+        return RedirectResponse(url=play_url, status_code=302)
+
+    return await proxy_stream_response(play_url, request)
+
 
 @router.api_route("/series/{username}/{password}/{stream_id}", methods=["GET", "HEAD"])
 async def play_series_stream(
@@ -292,7 +363,11 @@ async def play_series_stream(
     if not play_url:
         raise HTTPException(404, "Dizi akışı bulunamadı")
 
-    return RedirectResponse(url=play_url, status_code=302)
+    if not settings_manager.is_stream_proxy_enabled():
+        return RedirectResponse(url=play_url, status_code=302)
+
+    return await proxy_stream_response(play_url, request)
+
 
 @router.api_route("/{username}/{password}/{stream_id}", methods=["GET", "HEAD"])
 @router.api_route("/play/{username}/{password}/{stream_id}", methods=["GET", "HEAD"])
@@ -313,4 +388,7 @@ async def play_generic_stream(
     if not play_url:
         raise HTTPException(404, "Yayın akışı bulunamadı")
 
-    return RedirectResponse(url=play_url, status_code=302)
+    if not settings_manager.is_stream_proxy_enabled():
+        return RedirectResponse(url=play_url, status_code=302)
+
+    return await proxy_stream_response(play_url, request)

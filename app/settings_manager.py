@@ -247,3 +247,16 @@ def regenerate_api_password() -> str:
     if ENV_FILE.exists():
         update_env_file({"API_PASSWORD": new_pass})
     return new_pass
+
+
+def is_stream_proxy_enabled() -> bool:
+    """Video akışlarının sunucu üzerinden proxy edilip edilmeyeceğini döner (varsayılan: False)."""
+    return bool(_get_active_settings().get("stream_proxy_enabled", False))
+
+
+def set_stream_proxy_enabled(enabled: bool) -> None:
+    """Video proxy modunu açar veya kapatır."""
+    settings = load_settings()
+    settings["stream_proxy_enabled"] = bool(enabled)
+    save_settings(settings)
+

@@ -123,6 +123,7 @@ async def index(request: Request, db: Session = Depends(get_db)):
             "api_user": settings_manager.get_api_username(),
             "api_password": settings_manager.get_api_password(),
             "has_panel_password": settings_manager.has_panel_password(),
+            "stream_proxy_enabled": settings_manager.is_stream_proxy_enabled(),
             "server_host": server_host,
             "active_count": active_count,
         }
@@ -189,6 +190,17 @@ async def regenerate_api_password_endpoint(request: Request):
     settings_manager.regenerate_api_password()
     config.reload_security_config()
     return RedirectResponse("/?msg=api_pass_regenerated", status_code=303)
+
+@router.post("/settings/proxy/toggle")
+async def toggle_stream_proxy_endpoint(request: Request, enabled: Optional[bool] = Form(None)):
+    if settings_manager.has_panel_password() and not _check_panel_auth(request):
+        raise HTTPException(401, "Yetkisiz erişim")
+    if enabled is None:
+        new_state = not settings_manager.is_stream_proxy_enabled()
+    else:
+        new_state = bool(enabled)
+    settings_manager.set_stream_proxy_enabled(new_state)
+    return {"status": "ok", "stream_proxy_enabled": new_state}
 
 # ===================== SAĞLAYICI YÖNETİMİ & ÖNCELİK =====================
 

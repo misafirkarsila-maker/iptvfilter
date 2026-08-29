@@ -626,6 +626,42 @@
           <button class="copy-pill" onclick="copyText(document.getElementById('epgUrl').innerText, this)" data-i18n="copy_epg">EPG Kopyala</button>
         </div>
       </div>
+
+      <!-- Yayın Akış / Proxy Modu Paneli -->
+      <div class="stream-proxy-panel" style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="flex: 1; min-width: 250px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600; font-size: 0.92rem;" data-i18n="stream_mode_title">🛡️ Yayın Akış Modu:</span>
+            <span id="proxyBadge" class="badge {% if stream_proxy_enabled %}ok{% else %}mut{% endif %}" style="font-size: 0.76rem;">
+              {% if stream_proxy_enabled %}
+                ● <span data-i18n="proxy_active">Proxy Aktif (Sunucu Üzerinden)</span>
+              {% else %}
+                ○ <span data-i18n="proxy_inactive">Doğrudan Yönlendirme (302 Direct - Sıfır Yük)</span>
+              {% endif %}
+            </span>
+          </div>
+          <p id="proxyDesc" style="font-size: 0.78rem; color: var(--mut); margin-top: 4px; margin-bottom: 0;" data-i18n="{% if stream_proxy_enabled %}proxy_active_desc{% else %}proxy_inactive_desc{% endif %}">
+            {% if stream_proxy_enabled %}
+              Video paketleri bu sunucu üzerinden televizyona aktarılıyor. Oynatıcı sağlayıcının adresini görmez.
+            {% else %}
+              Oynatıcı doğrudan sağlayıcıya yönlendirilir. Sunucunuz bant genişliği ve video trafiği harcamaz.
+            {% endif %}
+          </p>
+        </div>
+
+        <div>
+          <button type="button" id="proxyActionBtn"
+                  class="btn sm {% if stream_proxy_enabled %}ghost{% endif %}"
+                  onclick="onProxyBtnClick()"
+                  data-enabled="{{ 'true' if stream_proxy_enabled else 'false' }}">
+            {% if stream_proxy_enabled %}
+              <span data-i18n="disable_proxy_btn">⚡ Doğrudan Moda Geç</span>
+            {% else %}
+              <span data-i18n="enable_proxy_btn">🛡️ Proxy'yi Etkinleştir</span>
+            {% endif %}
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Sağlayıcılar Listesi & Öncelik Sırası -->
@@ -796,6 +832,57 @@
     </div>
   </div>
 
+  <!-- Video Proxy Uyarı & Etkinleştirme Modalı -->
+  <div class="modal-overlay" id="proxyWarningModal" onclick="closeProxyModalOnOverlay(event)">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #f59e0b; display:flex; align-items:center; gap:8px;">
+          <span>⚠️</span> <span data-i18n="proxy_modal_title">Video Proxy Modunu Etkinleştir</span>
+        </h3>
+        <button class="modal-close" onclick="closeProxyModal()">✕</button>
+      </div>
+
+      <div style="font-size:0.86rem; color:var(--txt); line-height: 1.5; margin-bottom:16px;">
+        <p style="margin-bottom: 12px;" data-i18n="proxy_modal_intro">
+          Video Stream Proxy modunu etkinleştirmeden önce lütfen aşağıdaki kritik hususları değerlendiriniz:
+        </p>
+
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px;">
+          <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <span style="font-size:1.2rem; flex-shrink: 0;">📡</span>
+            <div>
+              <strong style="color:#fbbf24;" data-i18n="proxy_warn_1_title">Sunucu Bant Genişliği & Trafik:</strong>
+              <div style="font-size:0.8rem; color:var(--mut); margin-top:2px;" data-i18n="proxy_warn_1_desc">
+                Tüm canlı yayın ve film akışı bu sunucu (Orange Pi) üzerinden aktarılır. Aynı anda birden fazla cihaz izlediğinde internet ve ağ yükü artar.
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <span style="font-size:1.2rem; flex-shrink: 0;">🌍</span>
+            <div>
+              <strong style="color:#fbbf24;" data-i18n="proxy_warn_2_title">Sağlayıcı Kısıtlamaları (IP & Ülke Kilidi):</strong>
+              <div style="font-size:0.8rem; color:var(--mut); margin-top:2px;" data-i18n="proxy_warn_2_desc">
+                IPTV sağlayıcınız bağlantının bu sunucunun IP adresinden ve ülkesinden geldiğini görür. Bazı sağlayıcılar yurt dışı sunucuları engelleyebilir ya da hesabı askıya alabilir.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:0.8rem; color:var(--mut); margin:0;" data-i18n="proxy_modal_note">
+          Eğer televizyonunuzda veya oynatıcınızda yayın açılmasında bir sorun yoksa, <strong>Doğrudan Yönlendirme (302 Direct)</strong> modunda kalmanız tavsiye edilir.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn ghost sm" type="button" onclick="closeProxyModal()" data-i18n="cancel_btn">Vazgeç</button>
+        <button class="btn sm" type="button" style="background:#f59e0b; color:#000; font-weight:700;" onclick="confirmEnableProxy()" data-i18n="confirm_proxy_btn">
+          ⚠️ Anladım, Proxy'yi Aç
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function copyText(text, btn) {
       function showSuccess() {
@@ -874,6 +961,94 @@
       }
     }
 
+    // ================= STREAM PROXY YÖNETİMİ =================
+    function openProxyModal() {
+      document.getElementById('proxyWarningModal').classList.add('active');
+    }
+
+    function closeProxyModal() {
+      document.getElementById('proxyWarningModal').classList.remove('active');
+    }
+
+    function closeProxyModalOnOverlay(e) {
+      if (e.target.id === 'proxyWarningModal') {
+        closeProxyModal();
+      }
+    }
+
+    function onProxyBtnClick() {
+      const btn = document.getElementById('proxyActionBtn');
+      const isEnabled = btn.getAttribute('data-enabled') === 'true';
+      if (isEnabled) {
+        setProxyMode(false);
+      } else {
+        openProxyModal();
+      }
+    }
+
+    function confirmEnableProxy() {
+      closeProxyModal();
+      setProxyMode(true);
+    }
+
+    function setProxyMode(enable) {
+      const formData = new URLSearchParams();
+      formData.append('enabled', enable ? 'true' : 'false');
+
+      fetch('/settings/proxy/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        const btn = document.getElementById('proxyActionBtn');
+        const badge = document.getElementById('proxyBadge');
+        const desc = document.getElementById('proxyDesc');
+        const toastArea = document.getElementById('toastArea');
+
+        const currentL = localStorage.getItem('iptvfilter_lang') || 'tr';
+        const d = i18nData[currentL] || i18nData.tr;
+
+        if (data.stream_proxy_enabled) {
+          btn.setAttribute('data-enabled', 'true');
+          btn.className = 'btn sm ghost';
+          btn.innerHTML = `<span data-i18n="disable_proxy_btn">${d.disable_proxy_btn}</span>`;
+
+          badge.className = 'badge ok';
+          badge.innerHTML = `● <span data-i18n="proxy_active">${d.proxy_active}</span>`;
+
+          desc.innerText = d.proxy_active_desc;
+          desc.setAttribute('data-i18n', 'proxy_active_desc');
+
+          if (toastArea) {
+            toastArea.innerHTML = '<div class="toast success"><span>🛡️</span><span>Video Stream Proxy modu etkinleştirildi!</span></div>';
+          }
+        } else {
+          btn.setAttribute('data-enabled', 'false');
+          btn.className = 'btn sm';
+          btn.innerHTML = `<span data-i18n="enable_proxy_btn">${d.enable_proxy_btn}</span>`;
+
+          badge.className = 'badge mut';
+          badge.innerHTML = `○ <span data-i18n="proxy_inactive">${d.proxy_inactive}</span>`;
+
+          desc.innerText = d.proxy_inactive_desc;
+          desc.setAttribute('data-i18n', 'proxy_inactive_desc');
+
+          if (toastArea) {
+            toastArea.innerHTML = '<div class="toast success"><span>⚡</span><span>Doğrudan Yönlendirme (302 Direct) moduna geçildi!</span></div>';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Proxy toggle hatası:', err);
+        const toastArea = document.getElementById('toastArea');
+        if (toastArea) {
+          toastArea.innerHTML = '<div class="toast error"><span>⛔</span><span>Proxy modu değiştirilemedi.</span></div>';
+        }
+      });
+    }
+
     function autoParseM3uUrl(val) {
       if (!val) return;
       try {
@@ -934,6 +1109,22 @@
         "copy_btn": "Kopyala",
         "copy_m3u": "M3U Kopyala",
         "copy_epg": "EPG Kopyala",
+        "stream_mode_title": "🛡️ Yayın Akış Modu:",
+        "proxy_active": "Proxy Aktif (Sunucu Üzerinden)",
+        "proxy_inactive": "Doğrudan Yönlendirme (302 Direct - Sıfır Yük)",
+        "proxy_active_desc": "Video paketleri bu sunucu üzerinden televizyona aktarılıyor. Oynatıcı sağlayıcının adresini görmez.",
+        "proxy_inactive_desc": "Oynatıcı doğrudan sağlayıcıya yönlendirilir. Sunucunuz bant genişliği ve video trafiği harcamaz.",
+        "disable_proxy_btn": "⚡ Doğrudan Moda Geç",
+        "enable_proxy_btn": "🛡️ Proxy'yi Etkinleştir",
+        "proxy_modal_title": "Video Proxy Modunu Etkinleştir",
+        "proxy_modal_intro": "Video Stream Proxy modunu etkinleştirmeden önce lütfen aşağıdaki kritik hususları değerlendiriniz:",
+        "proxy_warn_1_title": "Sunucu Bant Genişliği & Trafik:",
+        "proxy_warn_1_desc": "Tüm canlı yayın ve film akışı bu sunucu (Orange Pi) üzerinden aktarılır. Aynı anda birden fazla cihaz izlediğinde internet ve ağ yükü artar.",
+        "proxy_warn_2_title": "Sağlayıcı Kısıtlamaları (IP & Ülke Kilidi):",
+        "proxy_warn_2_desc": "IPTV sağlayıcınız bağlantının bu sunucunun IP adresinden ve ülkesinden geldiğini görür. Bazı sağlayıcılar yurt dışı sunucuları engelleyebilir ya da hesabı askıya alabilir.",
+        "proxy_modal_note": "Eğer televizyonunuzda veya oynatıcınızda yayın açılmasında bir sorun yoksa, Doğrudan Yönlendirme (302 Direct) modunda kalmanız tavsiye edilir.",
+        "cancel_btn": "Vazgeç",
+        "confirm_proxy_btn": "⚠️ Anladım, Proxy'yi Aç",
         "providers_title": "IPTV Sağlayıcıları & Öncelik Sırası",
         "providers_desc": "Aktif sağlayıcılar öncelik sırasına göre tek listede birleştirilir. Üstteki sağlayıcının kanalları önceliklidir; aynı kanal alttakilerde varsa duplicate engellenir.",
         "providers_badge_suffix": "Sağlayıcı Aktif & Birleştiriliyor",
@@ -966,6 +1157,22 @@
         "copy_btn": "Copy",
         "copy_m3u": "Copy M3U",
         "copy_epg": "Copy EPG",
+        "stream_mode_title": "🛡️ Stream Playback Mode:",
+        "proxy_active": "Proxy Active (Via Server)",
+        "proxy_inactive": "Direct Redirect (302 Direct - Zero Load)",
+        "proxy_active_desc": "Video chunks are relayed through this server. Player never sees the provider's IP.",
+        "proxy_inactive_desc": "Player connects directly to provider. Zero bandwidth or server traffic consumed.",
+        "disable_proxy_btn": "⚡ Switch to Direct (302)",
+        "enable_proxy_btn": "🛡️ Enable Stream Proxy",
+        "proxy_modal_title": "Enable Video Proxy Mode",
+        "proxy_modal_intro": "Please review the following important considerations before enabling Stream Proxy mode:",
+        "proxy_warn_1_title": "Server Bandwidth & Traffic:",
+        "proxy_warn_1_desc": "All live streams and movies will stream through this server. Multiple concurrent viewers will increase network bandwidth usage.",
+        "proxy_warn_2_title": "Provider Restrictions (IP & Country Lock):",
+        "proxy_warn_2_desc": "Your IPTV provider will see traffic coming from this server's IP address and location. Some providers block accounts running on foreign or datacenter IPs.",
+        "proxy_modal_note": "If your players work fine, keeping Direct Redirect (302) mode is recommended.",
+        "cancel_btn": "Cancel",
+        "confirm_proxy_btn": "⚠️ I Understand, Enable Proxy",
         "providers_title": "IPTV Providers & Priority Order",
         "providers_desc": "Active providers are aggregated by priority order. Higher providers take precedence; duplicate streams are filtered automatically.",
         "providers_badge_suffix": "Providers Active & Aggregated",
