@@ -95,7 +95,7 @@ def sync_categories(db: Session, provider: Provider, ctype: str, cats: list[dict
             db.add(Category(
                 provider_id=provider.id, content_type=ctype,
                 provider_category_id=cid, name=name,
-                enabled=False, is_new=True, is_active=True,
+                enabled=True, is_new=True, is_active=True,
                 last_seen_at=now, sort_order=idx
             ))
     db.commit()

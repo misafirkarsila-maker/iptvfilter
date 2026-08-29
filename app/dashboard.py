@@ -388,3 +388,91 @@ async def bulk_toggle_categories(
         request, "partials/category_section.html",
         {"provider": provider, "categories": cats, "section_cats": cats, "content_type": content_type, "req": request}
     )
+
+@router.post("/categories/{category_id}/sort")
+async def sort_category(
+    request: Request,
+    category_id: int,
+    direction: str = Form(...), # "up" or "down"
+    content_type: str = Form(...),
+    provider_id: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    cats = db.query(Category).filter(
+        Category.provider_id == provider_id,
+        Category.content_type == content_type
+    ).order_by(Category.sort_order.asc(), Category.id.asc()).all()
+
+    # Sıralama numaralarını normalize et
+    for idx, c in enumerate(cats):
+        c.sort_order = idx
+
+    cur_idx = next((i for i, c in enumerate(cats) if c.id == category_id), None)
+    if cur_idx is not None:
+        if direction == "up" and cur_idx > 0:
+            cats[cur_idx].sort_order, cats[cur_idx - 1].sort_order = cur_idx - 1, cur_idx
+            db.commit()
+        elif direction == "down" and cur_idx < len(cats) - 1:
+            cats[cur_idx].sort_order, cats[cur_idx + 1].sort_order = cur_idx + 1, cur_idx
+            db.commit()
+
+    provider = db.query(Provider).get(provider_id)
+    updated_cats = db.query(Category).filter(
+        Category.provider_id == provider_id,
+        Category.content_type == content_type
+    ).order_by(Category.sort_order.asc(), Category.id.asc()).all()
+
+    return templates.TemplateResponse(
+        request, "partials/category_section.html",
+        {"provider": provider, "categories": updated_cats, "section_cats": updated_cats, "content_type": content_type, "req": request}
+    )
+
+@router.get("/categories/{category_id}/streams")
+async def category_streams_list(request: Request, category_id: int, db: Session = Depends(get_db)):
+    cat = db.query(Category).get(category_id)
+    if not cat:
+        raise HTTPException(404, "Kategori bulunamadı")
+    streams = db.query(Stream).filter(
+        Stream.category_id == category_id,
+        Stream.is_active == True
+    ).order_by(Stream.name.asc()).all()
+    return templates.TemplateResponse(
+        request, "partials/channel_list.html",
+        {"category": cat, "streams": streams, "req": request}
+    )
+
+@router.post("/streams/{stream_id}/toggle")
+async def toggle_stream(stream_id: int, db: Session = Depends(get_db)):
+    stream = db.query(Stream).get(stream_id)
+    if stream:
+        stream.enabled = not stream.enabled
+        stream.manual_enabled = stream.enabled
+        db.commit()
+        return {"status": "ok", "stream_id": stream.id, "enabled": stream.enabled}
+    raise HTTPException(404, "Kanal bulunamadı")
+
+@router.post("/categories/{category_id}/streams/bulk")
+async def bulk_toggle_category_streams(
+    request: Request,
+    category_id: int,
+    action: str = Form(...), # "enable" or "disable"
+    db: Session = Depends(get_db)
+):
+    cat = db.query(Category).get(category_id)
+    if not cat:
+        raise HTTPException(404, "Kategori bulunamadı")
+    enable = (action == "enable")
+    db.query(Stream).filter(
+        Stream.category_id == category_id,
+        Stream.is_active == True
+    ).update({"enabled": enable, "manual_enabled": enable})
+    db.commit()
+
+    streams = db.query(Stream).filter(
+        Stream.category_id == category_id,
+        Stream.is_active == True
+    ).order_by(Stream.name.asc()).all()
+    return templates.TemplateResponse(
+        request, "partials/channel_list.html",
+        {"category": cat, "streams": streams, "req": request}
+    )

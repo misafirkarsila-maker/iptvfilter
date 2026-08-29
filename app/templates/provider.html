@@ -64,5 +64,25 @@
       Bu sağlayıcı için aktif kategoriler kendi Xtream API'ne otomatik yansır.
     </div>
   </div>
+
+  <script>
+    function toggleCategoryChannels(catId) {
+      const box = document.getElementById('cat-streams-box-' + catId);
+      if (box && box.innerHTML.trim().length > 0) {
+        box.innerHTML = '';
+      } else {
+        htmx.ajax('GET', '/categories/' + catId + '/streams', {target: '#cat-streams-box-' + catId, swap: 'innerHTML'});
+      }
+    }
+
+    function filterChannelsInDrawer(input, catId) {
+      const val = input.value.toLowerCase().trim();
+      const items = document.querySelectorAll('#channel-grid-' + catId + ' .channel-item');
+      items.forEach(el => {
+        const name = el.getAttribute('data-name') || '';
+        el.style.display = name.includes(val) ? 'flex' : 'none';
+      });
+    }
+  </script>
 </body>
 </html>
