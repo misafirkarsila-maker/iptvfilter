@@ -14,6 +14,11 @@
 
 ---
 
+> [!TIP]
+> **🌐 Free Cloud Service (No Installation Required)**  
+> Don't want to manage Docker or a VPS? Use our ready-to-use free cloud instance:  
+> 🔗 [**iptvfilter.online**](https://iptvfilter.online) &nbsp;|&nbsp; ⚡ [**newlist.best**](https://newlist.best)
+
 ## 🇬🇧 English
 
 A production-ready, ultra-lightweight IPTV management platform and multi-provider aggregator. Merge multiple Xtream Codes providers and M3U playlists into a single clean API & M3U feed, eliminate duplicate channels with smart normalization, customize categories, and filter individual Live TV channels without proxying heavy video streams.
@@ -115,6 +120,11 @@ If your VPS has a NAT IPv4 (shared IP with restricted ports) and you own a domai
 ---
 
 <br>
+
+> [!TIP]
+> **🌐 Ücretsiz Hazır Bulut Servisi (Kurulum Gerektirmez)**  
+> Docker veya VPS sunucusu kurmak istemiyorsanız, doğrudan ücretsiz bulut altyapımızı kullanabilirsiniz:  
+> 🔗 [**iptvfilter.online**](https://iptvfilter.online) &nbsp;|&nbsp; ⚡ [**newlist.best**](https://newlist.best)
 
 ## 🇹🇷 Türkçe
 
