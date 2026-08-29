@@ -1,0 +1,29 @@
+# robots.txt for iptvfilter.online
+User-agent: *
+Allow: /$
+Allow: /login$
+Allow: /register$
+Allow: /static/
+Allow: /site.webmanifest
+Allow: /favicon.ico
+
+# Disallow private user areas, APIs and video redirects
+Disallow: /admin
+Disallow: /providers/
+Disallow: /categories/
+Disallow: /settings/
+Disallow: /board/
+Disallow: /sync
+Disallow: /player_api.php
+Disallow: /playlist.m3u
+Disallow: /playlist.m3u8
+Disallow: /get.php
+Disallow: /get.m3u
+Disallow: /get.m3u8
+Disallow: /xmltv.php
+Disallow: /live/
+Disallow: /movie/
+Disallow: /series/
+Disallow: /play/
+
+Sitemap: https://iptvfilter.online/sitemap.xml

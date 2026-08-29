@@ -89,6 +89,15 @@ async def service_worker():
         headers={"Service-Worker-Allowed": "/"}
     )
 
+# SEO Kök Yolları
+@app.api_route("/robots.txt", methods=["GET", "HEAD"], include_in_schema=False)
+async def robots():
+    return FileResponse(str(config.BASE_DIR / "app" / "static" / "robots.txt"), media_type="text/plain")
+
+@app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
+async def sitemap():
+    return FileResponse(str(config.BASE_DIR / "app" / "static" / "sitemap.xml"), media_type="application/xml")
+
 # Dashboard (web panel)
 app.include_router(dashboard_router)
 
