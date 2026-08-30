@@ -29,6 +29,7 @@ services:
       - LOG_LEVEL=INFO
     volumes:
       - ./data:/app/data
+      - ./app:/app/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

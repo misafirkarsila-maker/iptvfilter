@@ -93,30 +93,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--card-border);
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 12px;
     }
 
     .brand-area {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .brand-logo {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
 
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+      margin: 0;
     }
 
     h2 {
@@ -134,28 +137,6 @@
       gap: 8px;
       flex-wrap: nowrap;
       flex-shrink: 0;
-    }
-
-    .topbar-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
-    }
-
-    .btn-label-desktop {
-      display: inline;
-    }
-
-    .sync-svg-icon {
-      transition: transform 0.4s ease;
-    }
-    .topbar-btn:active .sync-svg-icon,
-    .htmx-request .sync-svg-icon {
-      animation: spin-icon 0.8s linear infinite;
-    }
-    @keyframes spin-icon {
-      100% { transform: rotate(360deg); }
     }
 
     /* Cards */
@@ -550,114 +531,100 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       background: rgba(0, 0, 0, 0.25);
+      flex-shrink: 0;
     }
     .lang-btn {
       background: transparent;
       border: none;
       color: var(--mut);
-      padding: 5px 9px;
-      font-size: 0.75rem;
+      padding: 4px 7px;
+      font-size: 0.95rem;
+      line-height: 1;
       cursor: pointer;
-      font-weight: 500;
       transition: all 0.15s;
     }
     .lang-btn:hover {
-      color: var(--txt);
+      background: rgba(255, 255, 255, 0.05);
     }
     .lang-btn.active {
       background: rgba(79, 140, 255, 0.2);
-      color: #93c5fd;
-      font-weight: 700;
     }
 
-    /* Topluluk Panosu (Community Board) Styles */
-    .board-filters-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 3px;
-      scrollbar-width: none;
-    }
-    .board-filters-bar::-webkit-scrollbar {
-      display: none;
-    }
-    .board-filter-btn {
-      white-space: nowrap;
-      flex-shrink: 0;
-      padding: 4px 10px;
-      font-size: 0.76rem;
-    }
-    .board-input-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-    }
-    .board-cat-select {
-      width: 135px;
-      flex-shrink: 0;
-      font-size: 0.8rem;
-      padding: 7px 8px;
-      background: var(--input-bg, rgba(13,16,24,0.9));
-      color: var(--txt);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      height: 38px;
-      cursor: pointer;
-    }
-    .board-input-box {
-      flex: 1;
-      min-width: 0;
-      position: relative;
-    }
-    .board-input-box input {
-      width: 100%;
-      height: 38px;
-      font-size: 0.84rem;
-      padding-right: 50px;
-      padding-left: 10px;
-      box-sizing: border-box;
-    }
-    .board-char-counter {
-      position: absolute;
-      right: 8px;
-      top: 10px;
-      font-size: 0.68rem;
-      color: var(--mut);
-      pointer-events: none;
-    }
-    .board-submit-btn {
-      height: 38px;
-      flex-shrink: 0;
-      padding: 0 14px;
+    /* Basit Proxy İkon Butonu (Kalkan) */
+    .proxy-icon-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
       justify-content: center;
+      width: 32px;
+      height: 29px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      border: 1px solid var(--card-border);
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      padding: 0;
     }
-    .board-footer-info {
-      display: flex;
-      justify-content: space-between;
+    .proxy-icon-btn:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    /* Proxy Kapalı: Gri Kalkan */
+    .proxy-icon-btn .shield-icon {
+      filter: grayscale(100%) opacity(0.42);
+      transition: all 0.2s;
+      display: inline-block;
+      line-height: 1;
+    }
+    /* Proxy Açık: Renkli Canlı Kalkan */
+    .proxy-icon-btn.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
+    }
+    .proxy-icon-btn.active .shield-icon {
+      filter: none;
+      transform: scale(1.06);
+    }
+
+    .topbar-btn {
+      display: inline-flex;
       align-items: center;
-      font-size: 0.7rem;
-      color: var(--mut);
-      padding: 2px 2px 0;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .btn-label-desktop {
+      display: inline;
+    }
+    .sync-svg-icon {
+      transition: transform 0.4s ease;
+    }
+    .topbar-btn:active .sync-svg-icon,
+    .htmx-request .sync-svg-icon {
+      animation: spin-icon 0.8s linear infinite;
+    }
+    @keyframes spin-icon {
+      100% { transform: rotate(360deg); }
     }
 
     /* Mobil Uyumluluk (Mobile Responsive) */
     @media (max-width: 768px) {
+      .btn-label-desktop {
+        display: none !important;
+      }
+      .topbar-btn {
+        padding: 5px 8px !important;
+        font-size: 0.95rem !important;
+        min-width: 32px;
+        justify-content: center;
+      }
       .wrap { padding: 12px 10px 40px; }
-      .topbar { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; }
-      .topbar-actions { gap: 5px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .btn-label-desktop { display: none !important; }
-      .topbar-btn { padding: 5px 8px !important; font-size: 0.95rem !important; min-width: 32px; justify-content: center; }
-      .board-input-row { gap: 6px; }
-      .board-cat-select { width: 46px; padding: 7px 4px; text-align: center; font-size: 0.9rem; }
-      .board-submit-btn { padding: 0 10px; min-width: 40px; }
-      .board-submit-btn .btn-label-desktop { display: none !important; }
-      .board-footer-info { font-size: 0.66rem; }
+      .topbar { gap: 6px; margin-bottom: 16px; padding-bottom: 12px; }
+      .brand-logo { font-size: 1.15rem; }
+      h1 { font-size: 1.05rem; }
+      .topbar-actions { gap: 5px; }
       .api-card { padding: 14px; }
       .api-grid { grid-template-columns: 1fr; gap: 8px; }
       .quick-links { padding: 10px; }
@@ -679,40 +646,35 @@
       </div>
 
       <div class="topbar-actions">
+        <!-- Basit Proxy Durum İkonu (Kalkan) -->
+        <button type="button" id="topbarProxyPill"
+                class="proxy-icon-btn {% if stream_proxy_enabled %}active{% endif %}"
+                onclick="onProxyBtnClick()"
+                title="{% if stream_proxy_enabled %}Video Proxy: Aktif (Sunucu Üzerinden){% else %}Yayın Modu: 302 Doğrudan (Proxy Kapalı){% endif %}">
+          <span id="topbarProxyIcon" class="shield-icon">🛡️</span>
+        </button>
+
         <!-- Dil Seçici (Sadece Bayraklar) -->
         <div class="lang-switcher">
           <button type="button" class="lang-btn" id="lang-btn-tr" onclick="setLanguage('tr')" title="Türkçe">🇹🇷</button>
           <button type="button" class="lang-btn" id="lang-btn-en" onclick="setLanguage('en')" title="English">🇬🇧</button>
         </div>
 
-        <a href="https://github.com/misafirkarsila-maker/iptvfilter" target="_blank" rel="noopener noreferrer" class="btn ghost sm topbar-btn" title="Self-Host Açık Kaynak Kodu (GitHub)" style="text-decoration:none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg><span class="btn-label-desktop">GitHub</span>
-        </a>
-
-        {% if current_user %}
-          {% if current_user.is_admin %}
-          <a href="/admin" class="btn ghost sm topbar-btn" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);" title="Yönetici Paneli">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-            </svg><span class="btn-label-desktop" data-i18n="admin_panel_btn">Yönetici Paneli</span>
-          </a>
-          {% endif %}
-
-          <span class="badge topbar-btn" style="background: rgba(79, 140, 255, 0.15); color: var(--acc); border: 1px solid rgba(79, 140, 255, 0.3); padding: 5px 9px; font-size: 0.8rem;" title="Kullanıcı: {{ current_user.username }}">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg><span class="btn-label-desktop">{{ current_user.username }}</span>
-          </span>
-
-          <button class="btn ghost sm topbar-btn" onclick="openSecurityModal()" title="Şifre Değiştir">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
-              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg><span class="btn-label-desktop" data-i18n="account_settings">Şifre Değiştir</span>
-          </button>
+        <!-- Panel Şifre Durumu Rozeti & Ayar Butonu -->
+        {% if has_panel_password %}
+        <button class="btn ghost sm topbar-btn" onclick="openSecurityModal()" title="Panel Korumalı (Şifre Ayarları)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg><span class="btn-label-desktop" data-i18n="panel_protected">Panel Korumalı</span>
+        </button>
+        {% else %}
+        <button class="btn ghost sm topbar-btn" onclick="openSecurityModal()" title="Şifresiz Panel (Şifre Ayarları)" style="border-color: rgba(245, 158, 11, 0.4); color: var(--new);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+          </svg><span class="btn-label-desktop" data-i18n="panel_unprotected">Şifresiz Panel</span>
+        </button>
         {% endif %}
 
         <form action="/sync" method="post" style="display:inline; margin:0;" hx-post="/sync" hx-target="#stats" hx-swap="innerHTML">
@@ -726,8 +688,9 @@
           </button>
         </form>
 
+        {% if has_panel_password %}
         <form action="/logout" method="post" style="display:inline; margin:0;">
-          <button class="btn ghost sm topbar-btn" type="submit" title="Çıkış">
+          <button class="btn ghost sm topbar-btn" type="submit" title="Çıkış Yap">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
@@ -735,6 +698,7 @@
             </svg><span class="btn-label-desktop" data-i18n="logout">Çıkış</span>
           </button>
         </form>
+        {% endif %}
       </div>
     </div>
 
@@ -748,10 +712,15 @@
           <span>📺</span>
           <span data-i18n="api_card_title">Xtream API Bağlantı Bilgileri</span>
         </div>
-        <div>
-          <span class="badge ok" style="padding: 4px 10px; font-size: 0.75rem;">
-            <span data-i18n="quota_label">Kota:</span> {{ providers | length }} / {{ current_user.max_providers if current_user else 2 }} <span data-i18n="providers_word">Sağlayıcı</span>
-          </span>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="copy-pill" type="button" onclick="openCustomPassModal()" title="Kendi belirleyeceğiniz sayısal bir PIN şifre girin">
+            <span data-i18n="edit_api_pass">✏️ PIN Belirle</span>
+          </button>
+          <form action="/settings/regenerate-api-password" method="post" onsubmit="return confirm('Yeni 8 haneli rastgele bir sayısal PIN üretmek istediğinize emin misiniz? IPTV uygulamalarınızdaki şifreyi de güncellemeniz gerekecektir.');" style="margin:0;">
+            <button class="copy-pill" type="submit" title="Yeni bir rastgele 8 haneli sayısal PIN oluşturur">
+              <span data-i18n="regen_api_pass">🔄 Yeni PIN Üret</span>
+            </button>
+          </form>
         </div>
       </div>
 
@@ -769,14 +738,13 @@
         </div>
 
         <div class="api-field">
-          <div class="api-field-label" data-i18n="password_label">API Şifresi (Password)</div>
+          <div class="api-field-label" data-i18n="password_label">API Şifresi (Sayısal PIN)</div>
           <div class="api-field-val">
-            <span class="api-code" id="apiPass" style="cursor:pointer; letter-spacing: 2px; font-weight: 700; color: #10b981;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">{{ api_password }}</span>
+            <span class="api-code" id="apiPassMasked" style="cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">••••••••</span>
+            <span class="api-code" id="apiPassReal" style="display:none; cursor:pointer;" onclick="copyText('{{ api_password }}', document.getElementById('passCopyBtn'))" title="Tıkla ve Kopyala">{{ api_password }}</span>
             <div style="display:flex; gap:4px;">
+              <button class="copy-pill" onclick="toggleApiPass()" id="togglePassBtn" title="Göster/Gizle">👁️</button>
               <button class="copy-pill" id="passCopyBtn" onclick="copyText('{{ api_password }}', this)" data-i18n="copy_btn">Kopyala</button>
-              <form action="/settings/regenerate-api-password" method="post" style="display:inline; margin:0;" onsubmit="return confirm('Yeni 8 haneli rastgele IPTV API şifresi üretmek istediğinize emin misiniz? TV cihazlarınızda yeni şifreyi güncellemeniz gerekecektir.');">
-                <button type="submit" class="copy-pill" id="regenPassBtn" title="Yeni 8 Haneli Rastgele Şifre Üret">🔄</button>
-              </form>
             </div>
           </div>
         </div>
@@ -784,100 +752,60 @@
         <div class="api-field">
           <div class="api-field-label" data-i18n="server_url_label">Sunucu Adresi (Server URL)</div>
           <div class="api-field-val">
-            <span class="api-code" id="srvUrl" style="cursor:pointer;" onclick="copyText('{{ server_scheme }}://{{ server_host }}', document.getElementById('srvCopyBtn'))" title="Tıkla ve Kopyala">{{ server_scheme }}://{{ server_host }}</span>
-            <button class="copy-pill" id="srvCopyBtn" onclick="copyText('{{ server_scheme }}://{{ server_host }}', this)" data-i18n="copy_btn">Kopyala</button>
+            <span class="api-code" id="srvUrl" style="cursor:pointer;" onclick="copyText('http://{{ server_host }}', document.getElementById('srvCopyBtn'))" title="Tıkla ve Kopyala">http://{{ server_host }}</span>
+            <button class="copy-pill" id="srvCopyBtn" onclick="copyText('http://{{ server_host }}', this)" data-i18n="copy_btn">Kopyala</button>
           </div>
         </div>
-      </div>
-
-      <!-- Kumanda Dostu 8 Haneli Şifre Bilgi Notu -->
-      <div style="display:flex; align-items:center; gap:8px; margin-top:12px; padding:9px 13px; border-radius:8px; background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.22); font-size:0.78rem; color:#6ee7b7;">
-        <span style="font-size: 1rem;">💡</span>
-        <span data-i18n="api_pass_tip">IPTV API şifreniz TV kumandasıyla kolay girilebilmesi için 8 haneli rastgele rakamlardan oluşturulmuştur. Web giriş şifrenizden bağımsızdır.</span>
       </div>
 
       <!-- Doğrudan Playlist Linkleri -->
       <div class="quick-links">
         <div class="quick-link-item">
-          <span class="quick-link-label" data-i18n="m3u_label">M3U Playlist:</span>
-          <span class="quick-link-url" id="m3uUrl">{{ server_scheme }}://{{ server_host }}/playlist.m3u?username={{ api_user }}&password={{ api_password_quoted }}</span>
+          <span class="quick-link-label">M3U Playlist:</span>
+          <span class="quick-link-url" id="m3uUrl">http://{{ server_host }}/playlist.m3u?username={{ api_user }}&password={{ api_password }}</span>
           <button class="copy-pill" onclick="copyText(document.getElementById('m3uUrl').innerText, this)" data-i18n="copy_m3u">M3U Kopyala</button>
         </div>
         <div class="quick-link-item">
-          <span class="quick-link-label" data-i18n="epg_label">XMLTV EPG:</span>
-          <span class="quick-link-url" id="epgUrl">{{ server_scheme }}://{{ server_host }}/xmltv.php?username={{ api_user }}&password={{ api_password_quoted }}</span>
+          <span class="quick-link-label">XMLTV EPG:</span>
+          <span class="quick-link-url" id="epgUrl">http://{{ server_host }}/xmltv.php?username={{ api_user }}&password={{ api_password }}</span>
           <button class="copy-pill" onclick="copyText(document.getElementById('epgUrl').innerText, this)" data-i18n="copy_epg">EPG Kopyala</button>
         </div>
       </div>
-    </div>
 
-    <!-- ================= TOPLULUK PANOSU & GERİ BİLDİRİM ================= -->
-    <div class="card" id="community-board" style="padding: 18px 20px; border-color: rgba(79, 140, 255, 0.2); margin-bottom: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 1.3rem;">💬</span>
-          <div>
-            <h3 style="margin: 0; font-size: 1rem; font-weight: 700;" data-i18n="board_title">Topluluk Panosu & Geri Bildirim</h3>
-            <p style="margin: 0; font-size: 0.76rem; color: var(--mut);" data-i18n="board_desc">
-              Görüş, öneri veya karşılaştığınız sorunları paylaşın. Mesajlar 3 gün sonra otomatik temizlenir.
-            </p>
+      <!-- Yayın Akış / Proxy Modu Paneli -->
+      <div class="stream-proxy-panel" style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <div style="flex: 1; min-width: 250px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600; font-size: 0.92rem;" data-i18n="stream_mode_title">🛡️ Yayın Akış Modu:</span>
+            <span id="proxyBadge" class="badge {% if stream_proxy_enabled %}ok{% else %}mut{% endif %}" style="font-size: 0.76rem;">
+              {% if stream_proxy_enabled %}
+                ● <span data-i18n="proxy_active">Proxy Aktif (Sunucu Üzerinden)</span>
+              {% else %}
+                ○ <span data-i18n="proxy_inactive">Doğrudan Yönlendirme (302 Direct - Sıfır Yük)</span>
+              {% endif %}
+            </span>
           </div>
+          <p id="proxyDesc" style="font-size: 0.78rem; color: var(--mut); margin-top: 4px; margin-bottom: 0;" data-i18n="{% if stream_proxy_enabled %}proxy_active_desc{% else %}proxy_inactive_desc{% endif %}">
+            {% if stream_proxy_enabled %}
+              Video paketleri bu sunucu üzerinden televizyona aktarılıyor. Oynatıcı sağlayıcının adresini görmez.
+            {% else %}
+              Oynatıcı doğrudan sağlayıcıya yönlendirilir. Sunucunuz bant genişliği ve video trafiği harcamaz.
+            {% endif %}
+          </p>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" class="btn xs ghost" id="toggleBoardBtn" onclick="toggleBoardVisibility()" style="font-size: 0.75rem;">
-            <span id="toggleBoardIcon">👁️</span> <span id="toggleBoardLabel" data-i18n="hide_board">Panoyu Gizle</span>
+        <div>
+          <button type="button" id="proxyActionBtn"
+                  class="btn sm {% if stream_proxy_enabled %}ghost{% endif %}"
+                  onclick="onProxyBtnClick()"
+                  data-enabled="{{ 'true' if stream_proxy_enabled else 'false' }}">
+            {% if stream_proxy_enabled %}
+              <span data-i18n="disable_proxy_btn">⚡ Doğrudan Moda Geç</span>
+            {% else %}
+              <span data-i18n="enable_proxy_btn">🛡️ Proxy'yi Etkinleştir</span>
+            {% endif %}
           </button>
         </div>
-      </div>
-
-      <div id="boardContentBody">
-        <!-- Kategori Filtre Butonları (Yatay Kaydırılabilir) -->
-        <div class="board-filters-bar">
-          <button type="button" class="copy-pill active board-filter-btn" id="filter-all" onclick="filterBoard('', this)" data-i18n="filter_all">Tümü</button>
-          <button type="button" class="copy-pill board-filter-btn" id="filter-chat" onclick="filterBoard('chat', this)" data-i18n="filter_chat">💬 Sohbet</button>
-          <button type="button" class="copy-pill board-filter-btn" id="filter-feedback" onclick="filterBoard('feedback', this)" data-i18n="filter_feedback">💡 İstek / Öneri</button>
-          <button type="button" class="copy-pill board-filter-btn" id="filter-issue" onclick="filterBoard('issue', this)" data-i18n="filter_issue">⚠️ Sorun Bildirimi</button>
-        </div>
-
-        <!-- Mesaj Kutusu Listesi -->
-        <div id="board-messages-box" style="max-height: 280px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
-          {% include "partials/board_messages.html" %}
-        </div>
-
-        <!-- Yeni Mesaj Gönderme Formu (Mobilde & Masaüstünde Tek Satır Uyumlu) -->
-        <form action="/board/post" method="post" id="boardPostForm" onsubmit="submitBoardPost(event)" style="display: flex; flex-direction: column; gap: 6px;">
-          <div class="board-input-row">
-            <select name="category" id="boardCategorySelect" class="board-cat-select" title="Kategori Seç">
-              <option value="chat" data-i18n="opt_chat">💬 Sohbet</option>
-              <option value="feedback" data-i18n="opt_feedback">💡 İstek / Öneri</option>
-              <option value="issue" data-i18n="opt_issue">⚠️ Sorun Bildirimi</option>
-            </select>
-
-            <div class="board-input-box">
-              <input type="text" name="content" id="boardContentInput"
-                     placeholder="Mesajını yaz... (maks. 300 karakter)"
-                     data-i18n-placeholder="board_input_ph"
-                     required maxlength="300"
-                     autocomplete="off"
-                     oninput="updateCharCount(this)">
-              <span id="charCountSpan" class="board-char-counter">0/300</span>
-            </div>
-
-            <button type="submit" class="btn sm board-submit-btn" id="boardSubmitBtn" title="Paylaş">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-              <span id="boardSubmitText" class="btn-label-desktop" data-i18n="btn_post">Paylaş</span>
-            </button>
-          </div>
-
-          <div class="board-footer-info">
-            <span data-i18n="board_disclaimer">⚠️ Yasal Uyarı: Yasa dışı IPTV linki, reklam, küfür ve telif ihlali paylaşımı yasaktır. Hesap süresiz kapatılır.</span>
-            <span id="cooldownTimerSpan" style="color: #f59e0b; font-weight: 600; display: none;"></span>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -902,7 +830,7 @@
         <div class="row" style="justify-content:space-between; margin-bottom:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="badge" style="background:rgba(79,140,255,0.15); color:var(--acc); font-weight:700; border:1px solid rgba(79,140,255,0.3);">
-              #{{ loop.index }} <span data-i18n="priority_label">Öncelik</span>
+              #{{ loop.index }} Öncelik
             </span>
             <div style="display:flex; gap:2px;">
               <form action="/providers/{{ p.id }}/priority" method="post" style="display:inline;">
@@ -916,7 +844,7 @@
             </div>
           </div>
           <span class="badge {% if p.last_sync_status=='ok' %}ok{% elif p.last_sync_status=='error' %}err{% else %}mut{% endif %}">
-            {% if p.last_sync_status=='ok' %}<span data-i18n="status_synced">✓ Senkronize</span>{% elif p.last_sync_status=='error' %}<span data-i18n="status_error">⛔ Hata</span>{% else %}<span data-i18n="status_new">Yeni</span>{% endif %}
+            {% if p.last_sync_status=='ok' %}✓ Senkronize{% elif p.last_sync_status=='error' %}⛔ Hata{% else %}Yeni{% endif %}
           </span>
         </div>
 
@@ -925,11 +853,11 @@
           <form action="/providers/{{ p.id }}/toggle" method="post" style="display:inline;">
             {% if p.enabled %}
             <button class="btn xs" type="submit" style="background:rgba(16,185,129,0.15); color:var(--ok); border:1px solid rgba(16,185,129,0.3);" title="Yayından kaldırmak için tıkla">
-              <span data-i18n="btn_active">● Yayında (Aktif)</span>
+              ● Yayında (Aktif)
             </button>
             {% else %}
             <button class="btn ghost xs" type="submit" style="color:var(--mut); border-color:rgba(255,255,255,0.1);" title="Yayına dahil etmek için tıkla">
-              <span data-i18n="btn_passive">○ Devre Dışı (Pasif)</span>
+              ○ Devre Dışı (Pasif)
             </button>
             {% endif %}
           </form>
@@ -1003,46 +931,129 @@
         </form>
       </div>
     </details>
-
-    <!-- Alt Bilgi / Footer -->
-    <div style="text-align: center; margin: 36px 0 12px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--mut);">
-      <span>Xtream Playlist Manager & IPTV Filter · </span>
-      <a href="https://github.com/misafirkarsila-maker/iptvfilter" target="_blank" rel="noopener noreferrer" style="color: var(--acc); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-weight: 500;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        <span>Self-Host Açık Kaynak Kodu (GitHub)</span>
-      </a>
-    </div>
   </div>
 
-  <!-- Güvenlik & Şifre Değiştirme Modalı -->
+  <!-- Güvenlik & Panel Şifresi Ayarları Modalı -->
   <div class="modal-overlay" id="securityModal" onclick="closeModalOnOverlay(event)">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">🔐 Hesap & API Şifresi Değiştir</h3>
+        <h3 class="modal-title" data-i18n="security_modal_title">🔐 Panel Güvenlik Ayarları</h3>
         <button class="modal-close" onclick="closeSecurityModal()">✕</button>
       </div>
 
       <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;">
-        Yeni şifreniz hem <strong>Web Paneli</strong> girişinizde hem de <strong>TiviMate / IPTV Smarters (Xtream API)</strong> oynatıcınızda anında geçerli olacaktır.
+        {% if has_panel_password %}
+        <span data-i18n="security_modal_desc_protected">Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.</span>
+        {% else %}
+        <span data-i18n="security_modal_desc_unprotected">Paneliniz şu anda <strong>şifresiz</strong>. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.</span>
+        {% endif %}
       </p>
 
-      <!-- Şifre Değiştir Formu -->
-      <form action="/settings/change-password" method="post">
+      <!-- Şifre Belirle / Değiştir Formu -->
+      <form action="/settings/panel-password" method="post">
+        <input type="hidden" name="action_type" value="set">
         <div style="margin-bottom:12px;">
-          <label for="current_pass">Mevcut Şifreniz</label>
-          <input type="password" id="current_pass" name="current_password" required placeholder="Mevcut şifreniz">
-        </div>
-        <div style="margin-bottom:12px;">
-          <label for="new_pass">Yeni Şifre</label>
-          <input type="password" id="new_pass" name="new_password" required minlength="6" placeholder="En az 6 karakter">
+          <label for="new_pass" data-i18n="new_pass_label">{% if has_panel_password %}Yeni Panel Şifresi{% else %}Panel Şifresi{% endif %}</label>
+          <input type="password" id="new_pass" name="new_password" required minlength="3" placeholder="En az 3 karakter">
         </div>
         <div style="margin-bottom:18px;">
-          <label for="new_pass_confirm">Yeni Şifre Tekrarı</label>
-          <input type="password" id="new_pass_confirm" name="new_password_confirm" required minlength="6" placeholder="Yeni şifreyi tekrar yazın">
+          <label for="new_pass_confirm" data-i18n="confirm_pass_label">Şifre Tekrarı</label>
+          <input type="password" id="new_pass_confirm" name="new_password_confirm" required minlength="3" placeholder="Şifrenizi tekrar yazın">
         </div>
         <button class="btn" type="submit" style="width:100%; justify-content:center;">
-          Şifreyi Güncelle
+          <span data-i18n="{% if has_panel_password %}update_pass_btn{% else %}protect_pass_btn{% endif %}">
+            {% if has_panel_password %}Şifreyi Güncelle{% else %}Şifreyi Kaydet ve Koru{% endif %}
+          </span>
         </button>
+      </form>
+
+      {% if has_panel_password %}
+      <hr style="border:0; border-top:1px solid var(--card-border); margin:20px 0;">
+      <form action="/settings/panel-password" method="post" onsubmit="return confirm('Panel korumasını kaldırıp şifresiz moda geçmek istediğinize emin misiniz?');">
+        <input type="hidden" name="action_type" value="remove">
+        <button class="btn ghost sm" type="submit" style="width:100%; justify-content:center; color:var(--err); border-color:rgba(239,68,68,0.3);">
+          <span data-i18n="remove_pass_btn">🔓 Şifreyi Kaldır (Şifresiz Kullan)</span>
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Video Proxy Uyarı & Etkinleştirme Modalı -->
+  <div class="modal-overlay" id="proxyWarningModal" onclick="closeProxyModalOnOverlay(event)">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #f59e0b; display:flex; align-items:center; gap:8px;">
+          <span>⚠️</span> <span data-i18n="proxy_modal_title">Video Proxy Modunu Etkinleştir</span>
+        </h3>
+        <button class="modal-close" onclick="closeProxyModal()">✕</button>
+      </div>
+
+      <div style="font-size:0.86rem; color:var(--txt); line-height: 1.5; margin-bottom:16px;">
+        <p style="margin-bottom: 12px;" data-i18n="proxy_modal_intro">
+          Video Stream Proxy modunu etkinleştirmeden önce lütfen aşağıdaki kritik hususları değerlendiriniz:
+        </p>
+
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 14px; margin-bottom: 14px;">
+          <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <span style="font-size:1.2rem; flex-shrink: 0;">📡</span>
+            <div>
+              <strong style="color:#fbbf24;" data-i18n="proxy_warn_1_title">Sunucu Bant Genişliği & Trafik:</strong>
+              <div style="font-size:0.8rem; color:var(--mut); margin-top:2px;" data-i18n="proxy_warn_1_desc">
+                Tüm canlı yayın ve film akışı bu sunucu üzerinden aktarılır. Aynı anda birden fazla cihaz izlediğinde internet ve ağ yükü artar.
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <span style="font-size:1.2rem; flex-shrink: 0;">🌍</span>
+            <div>
+              <strong style="color:#fbbf24;" data-i18n="proxy_warn_2_title">Sağlayıcı Kısıtlamaları (IP & Ülke Kilidi):</strong>
+              <div style="font-size:0.8rem; color:var(--mut); margin-top:2px;" data-i18n="proxy_warn_2_desc">
+                IPTV sağlayıcınız bağlantının bu sunucunun IP adresinden ve ülkesinden geldiğini görür. Bazı sağlayıcılar yurt dışı sunucuları engelleyebilir ya da hesabı askıya alabilir.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:0.8rem; color:var(--mut); margin:0;" data-i18n="proxy_modal_note">
+          Eğer televizyonunuzda veya oynatıcınızda yayın açılmasında bir sorun yoksa, <strong>Doğrudan Yönlendirme (302 Direct)</strong> modunda kalmanız tavsiye edilir.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn ghost sm" type="button" onclick="closeProxyModal()" data-i18n="cancel_btn">Vazgeç</button>
+        <button class="btn sm" type="button" style="background:#f59e0b; color:#000; font-weight:700;" onclick="confirmEnableProxy()" data-i18n="confirm_proxy_btn">
+          ⚠️ Anladım, Proxy'yi Aç
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sayısal API Şifresi (PIN) Belirleme Modalı -->
+  <div class="modal-overlay" id="customPassModal" onclick="closeCustomPassModalOnOverlay(event)">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔢 <span data-i18n="custom_pin_modal_title">Sayısal API Şifresi (PIN) Belirle</span></h3>
+        <button class="modal-close" onclick="closeCustomPassModal()">✕</button>
+      </div>
+
+      <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;" data-i18n="custom_pin_modal_desc">
+        TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 12345678 veya 4-12 haneli bir PIN):
+      </p>
+
+      <form action="/settings/custom-api-password" method="post">
+        <div style="margin-bottom:18px;">
+          <label for="custom_api_pin" data-i18n="pin_label">Yeni Sayısal PIN:</label>
+          <input type="text" id="custom_api_pin" name="api_password"
+                 inputmode="numeric" pattern="[0-9]*" required minlength="4" maxlength="16"
+                 value="{{ api_password }}" placeholder="Örnek: 12345678"
+                 style="font-size: 1.1rem; letter-spacing: 2px; font-weight: 600;">
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn ghost sm" type="button" onclick="closeCustomPassModal()" data-i18n="cancel_btn">Vazgeç</button>
+          <button class="btn sm" type="submit" data-i18n="save_pin_btn">PIN'i Kaydet</button>
+        </div>
       </form>
     </div>
   </div>
@@ -1094,6 +1105,23 @@
       document.body.removeChild(ta);
     }
 
+    let passShown = false;
+    function toggleApiPass() {
+      const masked = document.getElementById('apiPassMasked');
+      const real = document.getElementById('apiPassReal');
+      const btn = document.getElementById('togglePassBtn');
+      passShown = !passShown;
+      if (passShown) {
+        masked.style.display = 'none';
+        real.style.display = 'inline';
+        btn.innerText = '🙈';
+      } else {
+        masked.style.display = 'inline';
+        real.style.display = 'none';
+        btn.innerText = '👁️';
+      }
+    }
+
     function openSecurityModal() {
       document.getElementById('securityModal').classList.add('active');
     }
@@ -1105,6 +1133,129 @@
     function closeModalOnOverlay(e) {
       if (e.target.id === 'securityModal') {
         closeSecurityModal();
+      }
+    }
+
+    // ================= STREAM PROXY YÖNETİMİ =================
+    function openProxyModal() {
+      document.getElementById('proxyWarningModal').classList.add('active');
+    }
+
+    function closeProxyModal() {
+      document.getElementById('proxyWarningModal').classList.remove('active');
+    }
+
+    function closeProxyModalOnOverlay(e) {
+      if (e.target.id === 'proxyWarningModal') {
+        closeProxyModal();
+      }
+    }
+
+    function onProxyBtnClick() {
+      const btn = document.getElementById('proxyActionBtn');
+      const isEnabled = btn.getAttribute('data-enabled') === 'true';
+      if (isEnabled) {
+        setProxyMode(false);
+      } else {
+        openProxyModal();
+      }
+    }
+
+    function confirmEnableProxy() {
+      closeProxyModal();
+      setProxyMode(true);
+    }
+
+    function setProxyMode(enable) {
+      const formData = new URLSearchParams();
+      formData.append('enabled', enable ? 'true' : 'false');
+
+      fetch('/settings/proxy/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        const btn = document.getElementById('proxyActionBtn');
+        const badge = document.getElementById('proxyBadge');
+        const desc = document.getElementById('proxyDesc');
+        const toastArea = document.getElementById('toastArea');
+
+        const currentL = localStorage.getItem('iptvfilter_lang') || 'tr';
+        const d = i18nData[currentL] || i18nData.tr;
+
+        const topbarPill = document.getElementById('topbarProxyPill');
+        const topbarIcon = document.getElementById('topbarProxyIcon');
+
+        if (data.stream_proxy_enabled) {
+          btn.setAttribute('data-enabled', 'true');
+          btn.className = 'btn sm ghost';
+          btn.innerHTML = `<span data-i18n="disable_proxy_btn">${d.disable_proxy_btn}</span>`;
+
+          badge.className = 'badge ok';
+          badge.innerHTML = `● <span data-i18n="proxy_active">${d.proxy_active}</span>`;
+
+          desc.innerText = d.proxy_active_desc;
+          desc.setAttribute('data-i18n', 'proxy_active_desc');
+
+          if (topbarPill) {
+            topbarPill.classList.add('active');
+            topbarPill.title = 'Video Proxy: Aktif (Sunucu Üzerinden)';
+          }
+          if (topbarIcon) {
+            topbarIcon.innerText = '🛡️';
+          }
+
+          if (toastArea) {
+            toastArea.innerHTML = '<div class="toast success"><span>🛡️</span><span>Video Stream Proxy modu etkinleştirildi!</span></div>';
+          }
+        } else {
+          btn.setAttribute('data-enabled', 'false');
+          btn.className = 'btn sm';
+          btn.innerHTML = `<span data-i18n="enable_proxy_btn">${d.enable_proxy_btn}</span>`;
+
+          badge.className = 'badge mut';
+          badge.innerHTML = `○ <span data-i18n="proxy_inactive">${d.proxy_inactive}</span>`;
+
+          desc.innerText = d.proxy_inactive_desc;
+          desc.setAttribute('data-i18n', 'proxy_inactive_desc');
+
+          if (topbarPill) {
+            topbarPill.classList.remove('active');
+            topbarPill.title = 'Yayın Modu: 302 Doğrudan (Proxy Kapalı)';
+          }
+          if (topbarIcon) {
+            topbarIcon.innerText = '🛡️';
+          }
+
+          if (toastArea) {
+            toastArea.innerHTML = '<div class="toast success"><span>⚡</span><span>Doğrudan Yönlendirme (302 Direct) moduna geçildi!</span></div>';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Proxy toggle hatası:', err);
+        const toastArea = document.getElementById('toastArea');
+        if (toastArea) {
+          toastArea.innerHTML = '<div class="toast error"><span>⛔</span><span>Proxy modu değiştirilemedi.</span></div>';
+        }
+      });
+    }
+
+    function openCustomPassModal() {
+      document.getElementById('customPassModal').classList.add('active');
+      const input = document.getElementById('custom_api_pin');
+      if (input) setTimeout(() => input.focus(), 100);
+    }
+
+    function closeCustomPassModal() {
+      document.getElementById('customPassModal').classList.remove('active');
+    }
+
+    function closeCustomPassModalOnOverlay(e) {
+      if (e.target.id === 'customPassModal') {
+        closeCustomPassModal();
       }
     }
 
@@ -1135,238 +1286,67 @@
     const err = urlParams.get('err');
     const toastArea = document.getElementById('toastArea');
 
-    if (msg === 'api_password_regenerated') {
-      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Yeni 8 haneli rastgele IPTV API şifreniz başarıyla üretildi!</span></div>';
-    } else if (msg === 'password_updated') {
-      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel giriş şifreniz güncellendi.</span></div>';
+    if (msg === 'panel_pass_updated') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel şifresi başarıyla güncellendi.</span></div>';
+    } else if (msg === 'panel_pass_removed') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Panel şifresi kaldırıldı. Artık şifresiz açılacaktır.</span></div>';
+    } else if (msg === 'api_pass_regenerated') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Yeni 8 haneli sayısal PIN üretildi ve kaydedildi!</span></div>';
+    } else if (msg === 'api_pass_updated') {
+      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Sayısal API PIN şifreniz başarıyla kaydedildi!</span></div>';
     } else if (msg === 'provider_added_xtream') {
       toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>M3U linkinden Xtream hesabı doğrulandı, sağlayıcı eklendi ve arka planda senkronize ediliyor!</span></div>';
     } else if (msg === 'provider_added_m3u') {
       toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>M3U sağlayıcısı eklendi ve içerikler arka planda işleniyor!</span></div>';
     } else if (msg === 'provider_added') {
       toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Sağlayıcı başarıyla eklendi ve arka planda senkronize ediliyor!</span></div>';
-    } else if (msg === 'board_posted') {
-      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Mesajınız panoya eklendi!</span></div>';
-    } else if (msg === 'board_deleted') {
-      toastArea.innerHTML = '<div class="toast success"><span>✓</span><span>Mesaj silindi.</span></div>';
-    } else if (err === 'wrong_current_pass') {
-      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Mevcut şifrenizi yanlış girdiniz.</span></div>';
     } else if (err === 'pass_mismatch') {
-      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Girdiğiniz yeni şifreler eşleşmedi veya çok kısa (en az 6 karakter).</span></div>';
-    } else if (err === 'quota_exceeded') {
-      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Sağlayıcı ekleme limitinize (Maks. 2) ulaştınız.</span></div>';
-    } else if (err && err.length > 0) {
-      toastArea.innerHTML = `<div class="toast error"><span>⚠️</span><span>${decodeURIComponent(err)}</span></div>`;
+      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>Girdiğiniz şifreler eşleşmedi veya çok kısa.</span></div>';
+    } else if (err === 'empty_api_pass') {
+      toastArea.innerHTML = '<div class="toast error"><span>⚠️</span><span>PIN alanı boş bırakılamaz.</span></div>';
     }
-
-    // ================= TOPLULUK PANOSU (COMMUNITY BOARD) =================
-    let boardCooldownRemaining = {% if current_user and current_user.is_admin %}0{% else %}{{ board_cooldown or 0 }}{% endif %};
-    let currentBoardFilter = '';
-    let cooldownTimerInterval = null;
-
-    function updateCharCount(input) {
-      const len = input.value.length;
-      const countEl = document.getElementById('charCountSpan');
-      if (countEl) countEl.innerText = len + '/300';
-    }
-
-    async function filterBoard(cat, btn) {
-      currentBoardFilter = cat || '';
-      if (btn) {
-        document.querySelectorAll('.board-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      }
-      await refreshBoard();
-    }
-
-    async function refreshBoard() {
-      const url = currentBoardFilter ? ('/board/messages?category=' + currentBoardFilter) : '/board/messages';
-      try {
-        const r = await fetch(url);
-        const html = await r.text();
-        const box = document.getElementById('board-messages-box');
-        if (box) {
-          box.innerHTML = html;
-          applyLanguage(localStorage.getItem('iptvfilter_lang') || 'tr');
-        }
-      } catch (err) {
-        console.error('Pano yenileme hatası:', err);
-      }
-    }
-
-    async function submitBoardPost(e) {
-      e.preventDefault();
-      const form = document.getElementById('boardPostForm');
-      const input = document.getElementById('boardContentInput');
-      const btn = document.getElementById('boardSubmitBtn');
-      const content = input.value.trim();
-      if (!content) return;
-
-      btn.disabled = true;
-      btn.style.opacity = '0.6';
-
-      try {
-        const formData = new FormData(form);
-        const res = await fetch('/board/post', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-
-        const data = await res.json();
-        if (data.ok) {
-          input.value = '';
-          updateCharCount(input);
-          await refreshBoard();
-          const box = document.getElementById('board-messages-box');
-          if (box) box.scrollTop = 0;
-
-          {% if not current_user or not current_user.is_admin %}
-          if (data.cooldown > 0) {
-            startCooldown(data.cooldown);
-          }
-          {% endif %}
-        } else {
-          alert(data.error || 'Mesaj gönderilemedi.');
-        }
-      } catch (err) {
-        console.error('Board post error:', err);
-        // Fallback klasik form post
-        form.submit();
-      } finally {
-        {% if current_user and current_user.is_admin %}
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        {% else %}
-        if (boardCooldownRemaining <= 0) {
-          btn.disabled = false;
-          btn.style.opacity = '1';
-        }
-        {% endif %}
-      }
-    }
-
-    function startCooldown(sec) {
-      boardCooldownRemaining = sec;
-      const submitBtn = document.getElementById('boardSubmitBtn');
-      const timerSpan = document.getElementById('cooldownTimerSpan');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.5';
-        submitBtn.style.cursor = 'not-allowed';
-      }
-      if (timerSpan) {
-        timerSpan.style.display = 'inline';
-      }
-      if (cooldownTimerInterval) clearInterval(cooldownTimerInterval);
-
-      cooldownTimerInterval = setInterval(() => {
-        boardCooldownRemaining--;
-        const lang = localStorage.getItem('iptvfilter_lang') || 'tr';
-        if (boardCooldownRemaining <= 0) {
-          clearInterval(cooldownTimerInterval);
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-            submitBtn.style.cursor = 'pointer';
-          }
-          if (timerSpan) timerSpan.style.display = 'none';
-        } else {
-          if (timerSpan) {
-            timerSpan.innerText = lang === 'en'
-              ? ('⏳ Cooldown: ' + boardCooldownRemaining + ' s')
-              : ('⏳ Yeni mesaj için: ' + boardCooldownRemaining + ' sn');
-          }
-        }
-      }, 1000);
-    }
-
-    function toggleBoardVisibility() {
-      const body = document.getElementById('boardContentBody');
-      const label = document.getElementById('toggleBoardLabel');
-      const lang = localStorage.getItem('iptvfilter_lang') || 'tr';
-      const data = i18nData[lang] || i18nData.tr;
-      const isHidden = body.style.display === 'none';
-      if (isHidden) {
-        body.style.display = 'block';
-        if (label) label.innerText = data["hide_board"] || 'Panoyu Gizle';
-        localStorage.setItem('iptvfilter_board_hidden', 'false');
-      } else {
-        body.style.display = 'none';
-        if (label) label.innerText = data["show_board"] || 'Panoyu Göster';
-        localStorage.setItem('iptvfilter_board_hidden', 'true');
-      }
-    }
-
-    // Kayıtlı pano görünürlük durumunu uygula
-    if (localStorage.getItem('iptvfilter_board_hidden') === 'true') {
-      const bodyEl = document.getElementById('boardContentBody');
-      const labelEl = document.getElementById('toggleBoardLabel');
-      if (bodyEl) bodyEl.style.display = 'none';
-      if (labelEl) labelEl.innerText = 'Panoyu Göster';
-    }
-
-    // Sayfa açıldığında cooldown varsa başlat (Admin hariç)
-    {% if not current_user or not current_user.is_admin %}
-    if (boardCooldownRemaining > 0) {
-      startCooldown(boardCooldownRemaining);
-    }
-    {% endif %}
 
     // ================= DİL DESTEĞİ (i18n) =================
     const i18nData = {
       tr: {
         "brand_title": "Xtream Filter",
-        "sync_now": "⚡ Şimdi Güncelle",
-        "admin_panel_btn": "👑 Yönetici Paneli",
-        "account_settings": "🔑 Şifre Değiştir",
+        "sync_now": "Şimdi Güncelle",
+        "panel_protected": "Panel Korumalı",
+        "panel_unprotected": "Şifresiz Panel",
         "logout": "Çıkış",
         "api_card_title": "Xtream API Bağlantı Bilgileri",
+        "edit_api_pass": "✏️ PIN Belirle",
+        "regen_api_pass": "🔄 Yeni PIN Üret",
         "api_card_desc": 'IPTV uygulamanızda (TiviMate, IPTV Smarters, vb.) "Xtream Codes API" ile giriş yaparken aşağıdaki bilgileri kullanın:',
         "username_label": "Kullanıcı Adı (Username)",
-        "password_label": "API Şifresi (Password)",
-        "api_pass_tip": "IPTV API şifreniz TV kumandasıyla kolay girilebilmesi için 8 haneli rastgele rakamlardan oluşturulmuştur. Web giriş şifrenizden bağımsızdır.",
+        "password_label": "API Şifresi (Sayısal PIN)",
         "server_url_label": "Sunucu Adresi (Server URL)",
+        "custom_pin_modal_title": "Sayısal API Şifresi (PIN) Belirle",
+        "custom_pin_modal_desc": "TV kumandasıyla kolayca girebilmek için sadece rakamlardan oluşan bir şifre belirleyin (örn: 12345678 veya 4-12 haneli bir PIN):",
+        "pin_label": "Yeni Sayısal PIN:",
+        "save_pin_btn": "PIN'i Kaydet",
         "copy_btn": "Kopyala",
         "copy_m3u": "M3U Kopyala",
         "copy_epg": "EPG Kopyala",
-        "quota_label": "Kota:",
-        "providers_word": "Sağlayıcı",
-        "m3u_label": "M3U Playlist:",
-        "epg_label": "XMLTV EPG:",
-        "board_title": "Topluluk Panosu & Geri Bildirim",
-        "board_desc": "Görüş, öneri veya karşılaştığınız sorunları paylaşın. Mesajlar 3 gün sonra otomatik temizlenir.",
-        "hide_board": "Panoyu Gizle",
-        "show_board": "Panoyu Göster",
-        "board_filter_label": "Filtrele:",
-        "filter_all": "Tümü",
-        "filter_feedback": "💡 İstek / Öneri",
-        "filter_issue": "⚠️ Sorun Bildirimi",
-        "filter_chat": "💬 Sohbet",
-        "cat_feedback": "💡 İstek / Öneri",
-        "cat_issue": "⚠️ Sorun Bildirimi",
-        "cat_chat": "💬 Sohbet",
-        "cat_pinned": "📌 Sabit Duyuru",
-        "opt_chat": "💬 Sohbet",
-        "opt_feedback": "💡 İstek / Öneri",
-        "opt_issue": "⚠️ Sorun Bildirimi",
-        "board_input_ph": "Mesajını yaz... (maks. 300 karakter)",
-        "btn_post": "Paylaş",
-        "board_disclaimer": "⚠️ Yasal Uyarı: Yasa dışı IPTV linki, reklam, küfür ve telif ihlali paylaşımı yasaktır. Hesap süresiz kapatılır.",
-        "board_empty": "💬 Henüz bu filtrede bir mesaj yok. İlk görüş veya öneriyi sen paylaş! 🚀",
-        "lbl_you": "(Siz)",
+        "stream_mode_title": "🛡️ Yayın Akış Modu:",
+        "proxy_active": "Proxy Aktif (Sunucu Üzerinden)",
+        "proxy_inactive": "Doğrudan Yönlendirme (302 Direct - Sıfır Yük)",
+        "proxy_active_desc": "Video paketleri bu sunucu üzerinden televizyona aktarılıyor. Oynatıcı sağlayıcının adresini görmez.",
+        "proxy_inactive_desc": "Oynatıcı doğrudan sağlayıcıya yönlendirilir. Sunucunuz bant genişliği ve video trafiği harcamaz.",
+        "disable_proxy_btn": "⚡ Doğrudan Moda Geç",
+        "enable_proxy_btn": "🛡️ Proxy'yi Etkinleştir",
+        "proxy_modal_title": "Video Proxy Modunu Etkinleştir",
+        "proxy_modal_intro": "Video Stream Proxy modunu etkinleştirmeden önce lütfen aşağıdaki kritik hususları değerlendiriniz:",
+        "proxy_warn_1_title": "Sunucu Bant Genişliği & Trafik:",
+        "proxy_warn_1_desc": "Tüm canlı yayın ve film akışı bu sunucu üzerinden aktarılır. Aynı anda birden fazla cihaz izlediğinde internet ve ağ yükü artar.",
+        "proxy_warn_2_title": "Sağlayıcı Kısıtlamaları (IP & Ülke Kilidi):",
+        "proxy_warn_2_desc": "IPTV sağlayıcınız bağlantının bu sunucunun IP adresinden ve ülkesinden geldiğini görür. Bazı sağlayıcılar yurt dışı sunucuları engelleyebilir ya da hesabı askıya alabilir.",
+        "proxy_modal_note": "Eğer televizyonunuzda veya oynatıcınızda yayın açılmasında bir sorun yoksa, Doğrudan Yönlendirme (302 Direct) modunda kalmanız tavsiye edilir.",
+        "cancel_btn": "Vazgeç",
+        "confirm_proxy_btn": "⚠️ Anladım, Proxy'yi Aç",
         "providers_title": "IPTV Sağlayıcıları & Öncelik Sırası",
         "providers_desc": "Aktif sağlayıcılar öncelik sırasına göre tek listede birleştirilir. Üstteki sağlayıcının kanalları önceliklidir; aynı kanal alttakilerde varsa duplicate engellenir.",
         "providers_badge_suffix": "Sağlayıcı Aktif & Birleştiriliyor",
-        "priority_label": "Öncelik",
-        "status_synced": "✓ Senkronize",
-        "status_error": "⛔ Hata",
-        "status_new": "Yeni",
-        "btn_active": "● Yayında (Aktif)",
-        "btn_passive": "○ Devre Dışı (Pasif)",
         "manage_cats": "Kategorileri Yönet",
         "delete": "Sil",
         "last_sync": "Son senkronizasyon:",
@@ -1379,57 +1359,55 @@
         "server_url_label_input": "Sunucu URL",
         "username_label_input": "Kullanıcı Adı",
         "password_label_input": "Şifre",
-        "save_provider_btn": "Sağlayıcıyı Kaydet"
+        "save_provider_btn": "Sağlayıcıyı Kaydet",
+        "security_modal_title": "🔐 Panel Güvenlik Ayarları",
+        "security_modal_desc_protected": "Paneliniz şu anda şifre ile korunuyor. Şifrenizi değiştirebilir veya şifresiz moda geçebilirsiniz.",
+        "security_modal_desc_unprotected": "Paneliniz şu anda şifresiz. Yetkisiz erişimleri önlemek için bir şifre belirleyebilirsiniz.",
+        "new_pass_label": "Yeni Panel Şifresi",
+        "confirm_pass_label": "Şifre Tekrarı",
+        "update_pass_btn": "Şifreyi Güncelle",
+        "protect_pass_btn": "Şifreyi Kaydet ve Koru",
+        "remove_pass_btn": "🔓 Şifreyi Kaldır (Şifresiz Kullan)"
       },
       en: {
         "brand_title": "Xtream Filter",
-        "sync_now": "⚡ Sync Now",
-        "admin_panel_btn": "👑 Admin Panel",
-        "account_settings": "🔑 Change Password",
+        "sync_now": "Sync Now",
+        "panel_protected": "Protected",
+        "panel_unprotected": "Open Panel",
         "logout": "Logout",
         "api_card_title": "Xtream API & Connection Credentials",
+        "edit_api_pass": "✏️ Set PIN",
+        "regen_api_pass": "🔄 Generate PIN",
         "api_card_desc": 'Use these credentials in your IPTV player (TiviMate, IPTV Smarters, etc.) under "Xtream Codes API" login:',
         "username_label": "Username",
-        "password_label": "API Password",
-        "api_pass_tip": "Your IPTV API password is an 8-digit random PIN for easy entry with TV remotes. It is independent of your web password.",
+        "password_label": "API Password (PIN)",
         "server_url_label": "Server URL",
+        "custom_pin_modal_title": "Set Numeric API Password (PIN)",
+        "custom_pin_modal_desc": "Set a numeric PIN so you can easily type it using a TV remote control (e.g. 12345678 or a 4-12 digit PIN):",
+        "pin_label": "New Numeric PIN:",
+        "save_pin_btn": "Save PIN",
         "copy_btn": "Copy",
         "copy_m3u": "Copy M3U",
         "copy_epg": "Copy EPG",
-        "quota_label": "Quota:",
-        "providers_word": "Providers",
-        "m3u_label": "M3U Playlist:",
-        "epg_label": "XMLTV EPG:",
-        "board_title": "Community Board & Feedback",
-        "board_desc": "Share feedback, requests, or report issues. Messages are automatically cleaned up after 3 days.",
-        "hide_board": "Hide Board",
-        "show_board": "Show Board",
-        "board_filter_label": "Filter:",
-        "filter_all": "All",
-        "filter_feedback": "💡 Feedback / Request",
-        "filter_issue": "⚠️ Issue Report",
-        "filter_chat": "💬 General Chat",
-        "cat_feedback": "💡 Feedback / Request",
-        "cat_issue": "⚠️ Issue Report",
-        "cat_chat": "💬 General Chat",
-        "cat_pinned": "📌 Pinned Announcement",
-        "opt_chat": "💬 General Chat",
-        "opt_feedback": "💡 Feedback / Request",
-        "opt_issue": "⚠️ Issue Report",
-        "board_input_ph": "Write a message... (max 300 characters)",
-        "btn_post": "Post",
-        "board_disclaimer": "⚠️ Notice: Spam, illegal IPTV links, abuse, and copyright infringement are prohibited.",
-        "board_empty": "💬 No messages in this category yet. Be the first to share your thoughts! 🚀",
-        "lbl_you": "(You)",
+        "stream_mode_title": "🛡️ Stream Playback Mode:",
+        "proxy_active": "Proxy Active (Via Server)",
+        "proxy_inactive": "Direct Redirect (302 Direct - Zero Load)",
+        "proxy_active_desc": "Video chunks are relayed through this server. Player never sees the provider's IP.",
+        "proxy_inactive_desc": "Player connects directly to provider. Zero bandwidth or server traffic consumed.",
+        "disable_proxy_btn": "⚡ Switch to Direct (302)",
+        "enable_proxy_btn": "🛡️ Enable Stream Proxy",
+        "proxy_modal_title": "Enable Video Proxy Mode",
+        "proxy_modal_intro": "Please review the following important considerations before enabling Stream Proxy mode:",
+        "proxy_warn_1_title": "Server Bandwidth & Traffic:",
+        "proxy_warn_1_desc": "All live streams and movies will stream through this server. Multiple concurrent viewers will increase network bandwidth usage.",
+        "proxy_warn_2_title": "Provider Restrictions (IP & Country Lock):",
+        "proxy_warn_2_desc": "Your IPTV provider will see traffic coming from this server's IP address and location. Some providers block accounts running on foreign or datacenter IPs.",
+        "proxy_modal_note": "If your players work fine, keeping Direct Redirect (302) mode is recommended.",
+        "cancel_btn": "Cancel",
+        "confirm_proxy_btn": "⚠️ I Understand, Enable Proxy",
         "providers_title": "IPTV Providers & Priority Order",
         "providers_desc": "Active providers are aggregated by priority order. Higher providers take precedence; duplicate streams are filtered automatically.",
         "providers_badge_suffix": "Providers Active & Aggregated",
-        "priority_label": "Priority",
-        "status_synced": "✓ Synced",
-        "status_error": "⛔ Error",
-        "status_new": "New",
-        "btn_active": "● Enabled (Active)",
-        "btn_passive": "○ Disabled (Inactive)",
         "manage_cats": "Manage Categories",
         "delete": "Delete",
         "last_sync": "Last sync:",
@@ -1442,27 +1420,17 @@
         "server_url_label_input": "Server URL",
         "username_label_input": "Username",
         "password_label_input": "Password",
-        "save_provider_btn": "Save Provider"
+        "save_provider_btn": "Save Provider",
+        "security_modal_title": "🔐 Panel Security Settings",
+        "security_modal_desc_protected": "Your panel is currently password protected. You can change your password or switch to open mode.",
+        "security_modal_desc_unprotected": "Your panel is currently open. You can set a password to prevent unauthorized access.",
+        "new_pass_label": "New Panel Password",
+        "confirm_pass_label": "Confirm Password",
+        "update_pass_btn": "Update Password",
+        "protect_pass_btn": "Save and Protect",
+        "remove_pass_btn": "🔓 Remove Password (Open Access)"
       }
     };
-
-    function formatRelativeTime(isoStr, lang) {
-      if (!isoStr) return (lang === 'en' ? 'Never' : 'Hiç');
-      try {
-        const dt = new Date(isoStr);
-        const diffSec = Math.max(0, Math.floor((Date.now() - dt.getTime()) / 1000));
-        if (diffSec < 60) return (lang === 'en' ? 'Just now' : 'Az önce');
-        const mins = Math.floor(diffSec / 60);
-        if (mins < 60) return (lang === 'en' ? `${mins}m ago` : `${mins} dk önce`);
-        const hrs = Math.floor(mins / 60);
-        if (hrs < 24) return (lang === 'en' ? `${hrs}h ago` : `${hrs} saat önce`);
-        const days = Math.floor(hrs / 24);
-        if (days === 1) return (lang === 'en' ? 'Yesterday' : 'Dün');
-        return (lang === 'en' ? `${days}d ago` : `${days} gün önce`);
-      } catch (e) {
-        return '';
-      }
-    }
 
     function setLanguage(lang) {
       localStorage.setItem('iptvfilter_lang', lang);
@@ -1475,18 +1443,6 @@
         const key = el.getAttribute('data-i18n');
         if (data[key]) {
           el.innerText = data[key];
-        }
-      });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        if (data[key]) {
-          el.placeholder = data[key];
-        }
-      });
-      document.querySelectorAll('.board-msg-time').forEach(el => {
-        const ts = el.getAttribute('data-ts');
-        if (ts) {
-          el.innerText = formatRelativeTime(ts, lang);
         }
       });
       const btnTr = document.getElementById('lang-btn-tr');
@@ -1509,7 +1465,7 @@
     // PWA Service Worker Kaydı
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW hatası:', err));
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
     }
   </script>
