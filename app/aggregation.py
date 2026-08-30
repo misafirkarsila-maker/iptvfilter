@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
@@ -21,40 +22,45 @@ from .stream_adapters import get_adapter_for_provider
 
 logger = logging.getLogger(__name__)
 
+RE_PREFIX = re.compile(r"^(\[[A-Za-z0-9_]{1,4}\]|\([A-Za-z0-9_]{1,4}\)|[A-Za-z0-9_]{1,4}\s*[:|\-])\s*")
+RE_QUALITY = re.compile(r"(\[(fhd|uhd|4k|hd|sd|hevc|h\.?265|1080p|720p|50fps|raw|vip|backup|yedek)\]|\((fhd|uhd|4k|hd|sd|hevc|h\.?265|1080p|720p|50fps|raw|vip|backup|yedek)\)|\b(fhd|uhd|4k|hd|sd|hevc|h\.?265|1080p|720p|50fps|raw|vip|backup|yedek)\b)", re.IGNORECASE)
+RE_PUNCT = re.compile(r"[.\-_|/\\*+:]")
+RE_SPACES = re.compile(r"\s+")
+TR_TRANS = str.maketrans("ıİğĞüÜşŞöÖçÇ", "iIgGuUsSoOcC")
+
+# In-memory aggregation caches
+_CATEGORIES_CACHE: Dict[str, Tuple[float, List[dict], Dict[Tuple[int, str], str]]] = {}
+_STREAMS_CACHE: Dict[Tuple[str, Optional[str]], Tuple[float, List[dict], List[Stream]]] = {}
+CACHE_TTL = 300  # 5 dakika (sync veya ayar değişikliğinde anında temizlenir)
+
+
+def invalidate_aggregation_cache():
+    """Önbelleği temizler (sağlayıcı senkronizasyonu veya kategori değişikliği sonrası çağrılır)."""
+    _CATEGORIES_CACHE.clear()
+    _STREAMS_CACHE.clear()
+
 
 def normalize_channel_name(name: str) -> str:
     """Kanal adını küçük harfe çevirir, ülke öneklerini, çözünürlük etiketlerini ve
-    özel karakterleri temizleyerek duplicate karşılaştırması için normalize eder.
-    
-    Örnek:
-      'TR | TRT 1 HD' -> 'trt 1'
-      'TR: TRT 1 FHD [1080P]' -> 'trt 1'
-      'BEIN SPORTS 1 HD' -> 'bein sports 1'
-      'BEIN SPORTS 2 HD' -> 'bein sports 2'  (ayrı kanal olarak kalır)
-    """
+    özel karakterleri temizleyerek duplicate karşılaştırması için normalize eder."""
     if not name:
         return ""
     s = name.strip()
 
-    # 1. Ülke/dil öneklerini temizle: "TR: ", "TR | ", "[TR] ", "(TR) ", "DE: ", "FR - " vb.
-    s = re.sub(r"^(\[[A-Za-z0-9_]{1,4}\]|\([A-Za-z0-9_]{1,4}\)|[A-Za-z0-9_]{1,4}\s*[:|\-])\s*", "", s)
+    # 1. Ülke/dil öneklerini temizle
+    s = RE_PREFIX.sub("", s)
 
-    # 2. Türkçe karakterleri standart harflere dönüştür (Unicode-safe)
-    tr_from = "\u0131\u0130\u011f\u011e\u00fc\u00dc\u015f\u015e\u00f6\u00d6\u00e7\u00c7"
-    tr_to = "iIgGuUsSoOcC"
-    s = s.translate(str.maketrans(tr_from, tr_to)).lower()
+    # 2. Türkçe karakterleri standart harflere dönüştür
+    s = s.translate(TR_TRANS).lower()
 
-    # 3. Çözünürlük, kalite ve yayın tipi takılarını temizle (kelime sınırları veya parantezler içinde)
-    quality_patterns = r"(fhd|uhd|4k|hd|sd|hevc|h\.?265|1080p|720p|50fps|raw|vip|backup|yedek)"
-    s = re.sub(rf"\[{quality_patterns}\]", " ", s)
-    s = re.sub(rf"\({quality_patterns}\)", " ", s)
-    s = re.sub(rf"\b{quality_patterns}\b", " ", s)
+    # 3. Çözünürlük ve kalite etiketlerini temizle
+    s = RE_QUALITY.sub(" ", s)
 
     # 4. Noktalama işaretleri ve ayraçları boşluğa çevir
-    s = re.sub(r"[.\-_|/\\*+:]", " ", s)
+    s = RE_PUNCT.sub(" ", s)
 
     # 5. Boşlukları sadeleştir
-    s = re.sub(r"\s+", " ", s).strip()
+    s = RE_SPACES.sub(" ", s).strip()
 
     return s if s else name.strip().lower()
 
@@ -69,10 +75,16 @@ def get_active_providers(db: Session) -> List[Provider]:
 
 
 def get_aggregated_categories(db: Session, ctype: str) -> Tuple[List[dict], Dict[Tuple[int, str], str]]:
-    """Tüm aktif sağlayıcıların aktif kategorilerini toplar.
+    """Tüm aktif sağlayıcıların aktif kategorilerini toplar (5 dk önbellekli).
     Dönüş:
       (kategori_listesi, provider_ve_kategori_id_esleme_haritasi)
     """
+    now_ts = time.time()
+    if ctype in _CATEGORIES_CACHE:
+        cached_ts, cached_cats, cached_map = _CATEGORIES_CACHE[ctype]
+        if now_ts - cached_ts < CACHE_TTL:
+            return cached_cats, cached_map
+
     providers = get_active_providers(db)
     aggregated_cats: List[dict] = []
     seen_cat_names: Dict[str, str] = {}  # norm_name -> aggregated_cat_id
@@ -100,6 +112,7 @@ def get_aggregated_categories(db: Session, ctype: str) -> Tuple[List[dict], Dict
                 })
             cat_id_mapping[(prov.id, str(c.provider_category_id))] = agg_id
 
+    _CATEGORIES_CACHE[ctype] = (now_ts, aggregated_cats, cat_id_mapping)
     return aggregated_cats, cat_id_mapping
 
 
@@ -108,11 +121,18 @@ def get_aggregated_streams(
     ctype: str,
     filter_category_id: Optional[str] = None
 ) -> Tuple[List[dict], List[Stream]]:
-    """Tüm aktif sağlayıcılardan içerikleri çeker.
+    """Tüm aktif sağlayıcılardan içerikleri çeker (5 dk önbellekli).
     Sağlayıcı önceliğine göre duplicate olan kanalları eler.
     Dönüş:
       (xtream_stream_dicts, deduplicated_stream_models)
     """
+    cache_key = (ctype, str(filter_category_id) if filter_category_id else None)
+    now_ts = time.time()
+    if cache_key in _STREAMS_CACHE:
+        cached_ts, cached_out, cached_deduped = _STREAMS_CACHE[cache_key]
+        if now_ts - cached_ts < CACHE_TTL:
+            return cached_out, cached_deduped
+
     providers = get_active_providers(db)
     aggregated_cats, cat_id_map = get_aggregated_categories(db, ctype)
 
@@ -204,6 +224,7 @@ def get_aggregated_streams(
                     "category_id": agg_cat_id,
                 })
 
+    _STREAMS_CACHE[cache_key] = (now_ts, stream_output_list, deduped_streams)
     return stream_output_list, deduped_streams
 
 
@@ -320,10 +341,10 @@ def resolve_stream_playback_url(db: Session, raw_stream_id: str, ctype: str = "l
 
     # Stream'in kendi gerçek içerik türünü kullan
     stream_type = stream.content_type or ctype
-    ext = req_ext or stream.extension or stream.container
     if stream_type == "vod":
-        return adapter.build_vod_url(prov, stream, extension=ext).url
+        # Xtream VOD yönlendirmelerinde uzantısız format kullanılır (mevatv vb. 404 vermemesi için)
+        return adapter.build_vod_url(prov, stream, extension=None).url
     elif stream_type == "series":
-        return adapter.build_series_url(prov, stream, extension=ext).url
+        return adapter.build_series_url(prov, stream, extension=req_ext).url
     else:
         return adapter.build_live_url(prov, stream).url

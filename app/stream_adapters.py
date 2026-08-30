@@ -49,8 +49,11 @@ class StandardXtreamAdapter(StreamUrlAdapter):
         from . import crypto_util
         pwd = crypto_util.decrypt(provider.password_enc)
         base = provider.server_url.rstrip("/")
-        ext = (extension or stream.extension or stream.container or "mkv").strip().lstrip(".")
-        url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
+        ext = extension.strip().lstrip(".") if extension else None
+        if ext:
+            url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}.{ext}"
+        else:
+            url = f"{base}/movie/{provider.username}/{pwd}/{stream.provider_stream_id}"
         return StreamUrlParts(url=url)
 
     def build_series_url(self, provider: Provider, stream: Stream, extension: Optional[str] = None) -> StreamUrlParts:

@@ -73,6 +73,8 @@ def sync_provider(db: Session, provider: Provider) -> dict:
     provider.last_sync_status = "ok"
     provider.last_sync_error = None
     db.commit()
+    from .aggregation import invalidate_aggregation_cache
+    invalidate_aggregation_cache()
     return stats
 
 def sync_categories(db: Session, provider: Provider, ctype: str, cats: list[dict], now: datetime):

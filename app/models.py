@@ -7,6 +7,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    Index,
     String,
     Text,
     UniqueConstraint,
@@ -59,6 +60,7 @@ class Category(Base):
             "provider_id", "content_type", "provider_category_id",
             name="uq_category_provider",
         ),
+        Index("idx_categories_lookup", "provider_id", "content_type", "enabled", "is_active"),
     )
 
     id = Column(Integer, primary_key=True)
@@ -90,6 +92,8 @@ class Stream(Base):
             "provider_id", "content_type", "provider_stream_id",
             name="uq_stream_provider",
         ),
+        Index("idx_streams_lookup", "provider_id", "content_type", "enabled", "is_active"),
+        Index("idx_streams_prov_sid", "provider_stream_id"),
     )
 
     id = Column(Integer, primary_key=True)

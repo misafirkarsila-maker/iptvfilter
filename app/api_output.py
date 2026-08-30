@@ -248,9 +248,35 @@ async def player_api(
                         "vod_id": prov_vid
                     }, headers={"User-Agent": "IPTVSmartersPro"})
                     if resp.status_code == 200:
-                        return resp.json()
+                        try:
+                            data = resp.json()
+                            if data and (data.get("info") or data.get("movie_data")):
+                                return data
+                        except Exception:
+                            pass
             except Exception as ex:
                 logger.error("get_vod_info proxy hatasi: %s", ex)
+
+        if stream:
+            return {
+                "info": {
+                    "name": stream.name,
+                    "tmdb_id": 0,
+                    "plot": stream.description or "",
+                    "cast": "",
+                    "director": "",
+                    "genre": stream.category.name if stream.category else "",
+                    "release_date": stream.year or "",
+                    "cover_big": stream.stream_icon or "",
+                    "movie_image": stream.stream_icon or "",
+                    "rating": str(stream.rating or 0),
+                },
+                "movie_data": {
+                    "stream_id": stream.id,
+                    "name": stream.name,
+                    "container_extension": stream.extension or stream.container or "mp4",
+                }
+            }
         return {"info": {}, "movie_data": {}}
 
     raise HTTPException(400, f"Bilinmeyen action: {action}")

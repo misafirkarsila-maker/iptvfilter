@@ -35,7 +35,10 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
 
 
+from starlette.middleware.gzip import GZipMiddleware
+
 app = FastAPI(title="Xtream Filter", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 MAIN_PANEL_DOMAIN = os.getenv("MAIN_PANEL_DOMAIN", "iptvfilter.online").strip()
 API_SERVER_DOMAIN = os.getenv("API_SERVER_DOMAIN", "newlist.best").strip()

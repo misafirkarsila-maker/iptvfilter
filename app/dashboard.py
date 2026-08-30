@@ -395,6 +395,8 @@ async def toggle_category(category_id: int, db: Session = Depends(get_db)):
         db.commit()
         db.query(Stream).filter(Stream.category_id == cat.id).update({"enabled": cat.enabled})
         db.commit()
+        from .aggregation import invalidate_aggregation_cache
+        invalidate_aggregation_cache()
         return {"status": "ok", "category_id": cat.id, "enabled": cat.enabled}
     return RedirectResponse(f"/providers/{cat.provider_id}" if cat else "/", status_code=303)
 
@@ -430,6 +432,8 @@ async def bulk_toggle_group_categories(
             {"enabled": enable}, synchronize_session=False
         )
         db.commit()
+        from .aggregation import invalidate_aggregation_cache
+        invalidate_aggregation_cache()
 
     if request.headers.get("hx-request") == "true":
         provider = db.query(Provider).get(provider_id)
