@@ -9,7 +9,7 @@ services:
     container_name: xtream-filter
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${HOST_PORT:-4788}:8000"
     environment:
       # ---- Uygulama ----
       - APP_HOST=0.0.0.0
